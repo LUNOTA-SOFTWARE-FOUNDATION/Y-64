@@ -9,3 +9,9 @@ This repository contains the implementation of the architecture in various forms
 toolchains, hardware descriptions, etc).
 
 - spec/: Specifications and documentation
+
+## Specification classes
+
+- Class 0: Instruction set architecture
+- Class 1: Firmware and system software guide
+- Class 2: Processor internals
