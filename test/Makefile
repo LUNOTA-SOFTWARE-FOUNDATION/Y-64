@@ -1,6 +1,7 @@
 SV_FILES =						\
 	../sv/soc.sv				\
 	../sv/cpu/domain.sv			\
+	../sv/cpu/cache.sv			\
 	../sv/cpu/ctl.sv			\
 	../sv/cpu/rbank.sv
 

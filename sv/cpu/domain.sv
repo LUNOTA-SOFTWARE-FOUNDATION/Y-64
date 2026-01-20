@@ -17,6 +17,7 @@ module domain (
 
     /* verilator lint_off UNUSEDSIGNAL */
     logic [63:0] reg_bank_pool;
+    logic [7:0] cache_data_pool;
     logic pc_inhibit_latch;
 
     rbank reg_bank (
@@ -26,6 +27,14 @@ module domain (
         .reg_sel(reg_bank_sel),
         .reg_in(reg_bank_in),
         .reg_out(reg_bank_pool)
+    );
+
+    cache cache_unit (
+        .clk(clk),
+        .cache_we(0),
+        .cache_data_in(0),
+        .cache_data_out(cache_data_pool),
+        .cache_addr(0)
     );
 
     ctl ctl_unit (
