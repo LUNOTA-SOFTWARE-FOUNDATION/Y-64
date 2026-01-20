@@ -9,6 +9,8 @@ This repository contains the implementation of the architecture in various forms
 toolchains, hardware descriptions, etc).
 
 - spec/: Specifications and documentation
+- sv/:   System verilog hardware descriptions
+- test/: SoC verilog testbenches
 
 ## Specification classes
 
