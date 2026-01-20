@@ -1,4 +1,6 @@
 SV_FILES =						\
+	../sv/soc.sv				\
+	../sv/cpu/domain.sv			\
 	../sv/cpu/rbank.sv
 
 TB_FILES =				\
@@ -13,5 +15,5 @@ obj:
 
 .PHONY: vcd
 vcd:
-	make -C obj_dir/ -f Vrbank.mk Vrbank
-	./obj_dir/Vrbank
+	make -C obj_dir/ -f Vsoc.mk Vsoc
+	./obj_dir/Vsoc

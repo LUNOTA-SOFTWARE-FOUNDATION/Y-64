@@ -7,39 +7,39 @@
 #include <iostream>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-#include "Vrbank.h"
-#include "Vrbank___024root.h"
+#include "Vsoc.h"
+#include "Vsoc___024root.h"
 
 #define MAX_SIM_ITER 100
 
 int main(int argc, char** argv, char** env)
 {
-    Vrbank *rbank = new Vrbank;
+    Vsoc *soc = new Vsoc;
 
     Verilated::traceEverOn(true);
     VerilatedVcdC *m_trace = new VerilatedVcdC;
-    rbank->trace(m_trace, 5);
-    m_trace->open("rbank.vcd");
+    soc->trace(m_trace, 5);
+    m_trace->open("soc.vcd");
 
-    rbank->clk = 0;
+    soc->clk = 0;
     for (int i = 0; i < MAX_SIM_ITER; ++i) {
-        rbank->eval();
+        soc->eval();
         switch (i) {
         case 0:
             /* Power-up reset */
-            rbank->reset = 1;
+            soc->reset = 1;
             break;
         case 2:
             /* De-assert reset after two clocks */
-            rbank->reset = 0;
+            soc->reset = 0;
             break;
         }
 
         m_trace->dump(i);
-        rbank->clk ^= 1;
+        soc->clk ^= 1;
     }
 
     m_trace->close();
-    delete rbank;
+    delete soc;
     return 0;
 }
