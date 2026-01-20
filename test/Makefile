@@ -3,6 +3,7 @@ SV_FILES =						\
 	../sv/chipset/memctl.sv		\
 	../sv/chipset/busctl.sv		\
 	../sv/cpu/domain.sv			\
+	../sv/cpu/ctl.sv			\
 	../sv/cpu/rbank.sv
 
 TB_FILES =				\

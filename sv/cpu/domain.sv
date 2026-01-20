@@ -9,6 +9,7 @@
 module domain (
     input wire clk,
     input wire reset,
+    input wire pc_inhibit,
 
     /* verilator lint_off UNUSEDSIGNAL */
     input logic [7:0] bus_data_in
@@ -19,6 +20,7 @@ module domain (
 
     /* verilator lint_off UNUSEDSIGNAL */
     logic [63:0] reg_bank_pool;
+    logic pc_inhibit_latch;
 
     rbank reg_bank (
         .clk(clk),
@@ -29,12 +31,22 @@ module domain (
         .reg_out(reg_bank_pool)
     );
 
+    ctl ctl_unit (
+        .clk(clk),
+        .reset(reset),
+        .pc_inhibit(pc_inhibit_latch)
+    );
+
     always @(posedge clk) begin
         if (reset) begin
+            pc_inhibit_latch <= 1;
             reg_bank_we <= 0;
             reg_bank_sel <= 0;
             reg_bank_pool <= 0;
             reg_bank_in <= 0;
+        end
+        else begin
+            pc_inhibit_latch <= pc_inhibit;
         end
     end
 endmodule

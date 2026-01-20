@@ -15,7 +15,8 @@ module soc (
     domain cpu_domain0 (
         .clk(clk),
         .reset(reset),
-        .bus_data_in(bus_data_pool)
+        .bus_data_in(bus_data_pool),
+        .pc_inhibit(0)
     );
 
     busctl bus_unit (
