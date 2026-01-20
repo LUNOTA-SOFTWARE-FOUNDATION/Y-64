@@ -1,5 +1,7 @@
 SV_FILES =						\
 	../sv/soc.sv				\
+	../sv/chipset/memctl.sv		\
+	../sv/chipset/busctl.sv		\
 	../sv/cpu/domain.sv			\
 	../sv/cpu/rbank.sv
 
