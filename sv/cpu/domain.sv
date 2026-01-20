@@ -9,10 +9,7 @@
 module domain (
     input wire clk,
     input wire reset,
-    input wire pc_inhibit,
-
-    /* verilator lint_off UNUSEDSIGNAL */
-    input logic [7:0] bus_data_in
+    input wire pc_inhibit
 );
     logic reg_bank_we;
     logic [4:0] reg_bank_sel;
