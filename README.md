@@ -8,6 +8,7 @@ the goal of providing certain similarities to x86-64 while being far more compac
 This repository contains the implementation of the architecture in various forms (i.e., virtual machines,
 toolchains, hardware descriptions, etc).
 
+- emul/: Emulation / virtual machine
 - spec/: Specifications and documentation
 - sv/:   System verilog hardware descriptions
 - test/: SoC verilog testbenches

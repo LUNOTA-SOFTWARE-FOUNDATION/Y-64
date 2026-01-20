@@ -1,2 +1,4 @@
 *.vcd
+*.o
 /test/obj_dir
+/emul/y64emu
