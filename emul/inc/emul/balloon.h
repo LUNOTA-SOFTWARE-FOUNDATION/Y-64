@@ -51,6 +51,22 @@ ssize_t balloon_write(
 );
 
 /*
+ * Read from a balloon
+ *
+ * @bp:     Balloon pointer
+ * @addr:   Address to read
+ * @buf:    Buffer to read data into
+ * @n:      Number of bytes to read
+ *
+ * Returns the number of bytes written on success,
+ * otherwise a less than zero value on failure.
+ */
+ssize_t balloon_read(
+    struct balloon_mem *bp, uintptr_t addr,
+    void *buf, size_t n
+);
+
+/*
  * Destroy an allocated balloon
  *
  * @balloon: Balloon to destroy

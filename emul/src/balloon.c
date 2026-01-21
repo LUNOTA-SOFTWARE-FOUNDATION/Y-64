@@ -67,6 +67,34 @@ balloon_write(struct balloon_mem *bp, uintptr_t addr, const void *buf, size_t n)
     return n;
 }
 
+ssize_t
+balloon_read(struct balloon_mem *bp, uintptr_t addr, void *buf, size_t n)
+{
+    if (bp == NULL || buf == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((addr + n) >= bp->cap) {
+        errno = -EIO;
+        return -1;
+    }
+
+    if (addr >= bp->cur_size) {
+        memset(buf, 0, n);
+        return n;
+    }
+
+    /* TODO: Read zeros when past cur_size */
+    if ((addr + n) >= bp->cur_size) {
+        errno = -EIO;
+        return -1;
+    }
+
+    memcpy(buf, &bp->buf[addr], n);
+    return n;
+}
+
 void
 balloon_destroy(struct balloon_mem *balloon)
 {
