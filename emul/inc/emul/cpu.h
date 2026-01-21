@@ -11,7 +11,7 @@
 #define DOMAIN_CACHE_SIZE 32768
 
 struct cpu_domain {
-    struct ballon_mem cache;
+    struct balloon_mem cache;
 };
 
 /*
