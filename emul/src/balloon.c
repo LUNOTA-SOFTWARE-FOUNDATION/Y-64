@@ -63,7 +63,7 @@ balloon_write(struct balloon_mem *bp, uintptr_t addr, const void *buf, size_t n)
         bp->buf = tmp;
     }
 
-    memcpy(&bp->buf[0], buf, n);
+    memcpy(&bp->buf[addr], buf, n);
     return n;
 }
 
