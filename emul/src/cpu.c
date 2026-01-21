@@ -7,14 +7,37 @@
 #include <errno.h>
 #include <stddef.h>
 #include "emul/cpu.h"
+#include "emul/trace.h"
+#include "emul/busctl.h"
+
+/* Local cache peer */
+static struct bus_peer lcache_peer;
+
+static ssize_t
+lcache_write(struct bus_peer *bp, uintptr_t addr, const void *buf, size_t n)
+{
+    return 0;
+}
+
+static ssize_t
+lcache_read(struct bus_peer *bp, uintptr_t addr, void *buf, size_t n)
+{
+    return 0;
+}
 
 int
 cpu_power_up(struct cpu_domain *cpu)
 {
+    struct bus_peer *p = NULL;
     int error;
 
     if (cpu == NULL) {
         errno = -EINVAL;
+        return -1;
+    }
+
+    if (bus_peer_set(&lcache_peer, DOMAIN_LCACHE_BASE) < 0) {
+        trace_error("failed to set lcache bus peer\n");
         return -1;
     }
 
@@ -35,3 +58,9 @@ cpu_destroy(struct cpu_domain *cpu)
 
     balloon_destroy(&cpu->cache);
 }
+
+static struct bus_peer lcache_peer = {
+    .type = BUS_PEER_LCACHE,
+    .read = lcache_read,
+    .write = lcache_write
+};

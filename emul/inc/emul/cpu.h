@@ -8,7 +8,12 @@
 
 #include "emul/balloon.h"
 
+/* Maximum local cache size */
 #define DOMAIN_CACHE_SIZE 32768
+
+/* Address of lcache MMIO */
+#define DOMAIN_LCACHE_BASE 0x00100000
+#define DOMAIN_LCACHE_SIZE 0x1000
 
 struct cpu_domain {
     struct balloon_mem cache;
