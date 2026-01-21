@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <stddef.h>
+#include <string.h>
 #include "emul/cpu.h"
 #include "emul/trace.h"
 #include "emul/busctl.h"
@@ -59,6 +60,7 @@ cpu_power_up(struct cpu_domain *cpu)
         return -1;
     }
 
+    memset(cpu, 0, sizeof(*cpu));
     lcache_peer.data = cpu;
     if (bus_peer_set(&lcache_peer, DOMAIN_LCACHE_BASE) < 0) {
         trace_error("failed to set lcache bus peer\n");
