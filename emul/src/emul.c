@@ -11,6 +11,7 @@
 #include "emul/soc.h"
 #include "emul/trace.h"
 #include "emul/balloon.h"
+#include "emul/memctl.h"
 
 #define EMUL_VERSION "0.0.1"
 
