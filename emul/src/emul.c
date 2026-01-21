@@ -3,11 +3,14 @@
  * Provided under the BSD-3 clause.
  */
 
+#include <sys/mman.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include "emul/soc.h"
 #include "emul/trace.h"
+#include "emul/balloon.h"
 
 #define EMUL_VERSION "0.0.1"
 
@@ -38,15 +41,84 @@ version(void)
 }
 
 static void
+cache_dump(struct balloon_mem *cache)
+{
+    const size_t N_BYTES = 128;
+    size_t i;
+
+    printf("[*] dumping first %zd bytes of lcache", N_BYTES);
+
+    for (i = 0; i < N_BYTES; ++i) {
+        if (i >= cache->cur_size) {
+            printf("\n[?] output truncated to %zd bytes\n", i);
+            break;
+        }
+
+        if ((i % 16) == 0) {
+            printf("\n");
+            printf("[%08zX] ", i);
+        }
+
+        printf("%02X ", cache->buf[i] & 0xFF);
+    }
+
+    if (i >= N_BYTES) {
+        printf("\n");
+    }
+}
+
+static void
 emul_run(void)
 {
+    void *fw_buf;
+    struct cpu_domain *cpu;
     struct soc_desc soc;
+    size_t fw_size;
+    ssize_t n;
+    int fw_fd;
 
     if (soc_power_up(&soc) < 0) {
         trace_error("failed to perform soc power-up\n");
         return;
     }
 
+    cpu = &soc.cpu;
+    fw_fd = open(firmware_path, O_RDONLY);
+
+    if (fw_fd < 0) {
+        trace_error("failed to open firmware ROM\n");
+        perror("open");
+        return;
+    }
+
+    /* Obtain the size */
+    fw_size = lseek(fw_fd, 0, SEEK_END);
+    lseek(fw_fd, 0, SEEK_SET);
+
+    /* Map the file */
+    fw_buf = mmap(
+        NULL,
+        fw_size,
+        PROT_READ,
+        MAP_SHARED,
+        fw_fd,
+        0
+    );
+
+    if (fw_buf == NULL) {
+        trace_error("failed to open firmware ROM\n");
+        perror("mmap");
+        return;
+    }
+
+    if ((n = balloon_write(&cpu->cache, 0, fw_buf, fw_size)) < 0) {
+        trace_error("failed to write firmware\n");
+        perror("balloon_write");
+        return;
+    }
+
+    cache_dump(&cpu->cache);
+    munmap(fw_buf, fw_size);
     soc_destroy(&soc);
 }
 
