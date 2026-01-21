@@ -49,6 +49,7 @@ struct bus_peer {
     struct bus_peer_range range;
     ssize_t(*read)(struct bus_peer *bp, uintptr_t addr, void *buf, size_t n);
     ssize_t(*write)(struct bus_peer *bp, uintptr_t addr, const void *buf, size_t n);
+    void *data;
 };
 
 /*

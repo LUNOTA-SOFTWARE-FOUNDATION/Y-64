@@ -16,19 +16,42 @@ static struct bus_peer lcache_peer;
 static ssize_t
 lcache_write(struct bus_peer *bp, uintptr_t addr, const void *buf, size_t n)
 {
-    return 0;
+    struct cpu_domain *cpu;
+
+    if ((cpu = bp->data) == NULL) {
+        errno = -EIO;
+        return -1;
+    }
+
+    return balloon_write(
+        &cpu->cache,
+        bus_peer_mmio(DOMAIN_LCACHE_BASE, addr),
+        buf,
+        n
+    );
 }
 
 static ssize_t
 lcache_read(struct bus_peer *bp, uintptr_t addr, void *buf, size_t n)
 {
-    return 0;
+    struct cpu_domain *cpu;
+
+    if ((cpu = bp->data) == NULL) {
+        errno = -EIO;
+        return -1;
+    }
+
+    return balloon_read(
+        &cpu->cache,
+        bus_peer_mmio(DOMAIN_LCACHE_BASE, addr),
+        buf,
+        n
+    );
 }
 
 int
 cpu_power_up(struct cpu_domain *cpu)
 {
-    struct bus_peer *p = NULL;
     int error;
 
     if (cpu == NULL) {
@@ -36,6 +59,7 @@ cpu_power_up(struct cpu_domain *cpu)
         return -1;
     }
 
+    lcache_peer.data = cpu;
     if (bus_peer_set(&lcache_peer, DOMAIN_LCACHE_BASE) < 0) {
         trace_error("failed to set lcache bus peer\n");
         return -1;
