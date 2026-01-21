@@ -14,6 +14,30 @@
 /* Local cache peer */
 static struct bus_peer lcache_peer;
 
+/* Register to string lookup table */
+static const char *regstr[] = {
+    [REG_G0] = "G0",
+    [REG_G1] = "G1",
+    [REG_G2] = "G2",
+    [REG_G3] = "G3",
+    [REG_G4] = "G4",
+    [REG_G5] = "G5",
+    [REG_G6] = "G6",
+    [REG_G7] = "G7",
+    [REG_A0] = "A0",
+    [REG_A1] = "A1",
+    [REG_A2] = "A2",
+    [REG_A3] = "A3",
+    [REG_A4] = "A4",
+    [REG_A5] = "A5",
+    [REG_A6] = "A6",
+    [REG_A7] = "A7",
+    [REG_TT] = "TT",
+    [REG_SP] = "SP",
+    [REG_FP] = "FP",
+    [REG_PC] = "PC"
+};
+
 static ssize_t
 lcache_write(struct bus_peer *bp, uintptr_t addr, const void *buf, size_t n)
 {
@@ -50,6 +74,24 @@ lcache_read(struct bus_peer *bp, uintptr_t addr, void *buf, size_t n)
     );
 }
 
+void
+cpu_dump(struct cpu_domain *cpu)
+{
+    if (cpu == NULL) {
+        return;
+    }
+
+    printf("[pd=%d]\n", cpu->domain_id);
+    for (int i = 0; i < REG_MAX; ++i) {
+        if (i > 0 && (i % 2) == 0) {
+            printf("\n");
+        }
+        printf("%s=0x%016zX ", regstr[i], cpu->regbank[i]);
+    }
+
+    printf("\n");
+}
+
 int
 cpu_power_up(struct cpu_domain *cpu)
 {
@@ -70,6 +112,13 @@ cpu_power_up(struct cpu_domain *cpu)
     error = balloon_new(&cpu->cache, 32, DOMAIN_CACHE_SIZE);
     if (error < 0) {
         return -1;
+    }
+
+    /* Put all registers to their reset state */
+    for (int i = 0; i < REG_MAX; ++i) {
+        cpu->regbank[i] = (i <= REG_A7)
+            ? 0x1A1F1A1F1A1F1A1F
+            : 0;
     }
 
     return 0;

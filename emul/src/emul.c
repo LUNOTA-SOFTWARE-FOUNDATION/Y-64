@@ -119,6 +119,10 @@ emul_run(void)
 
     mem_write(DOMAIN_LCACHE_BASE, fw_buf, fw_size);
     cache_dump(&cpu->cache);
+
+    printf("[*] dumping bootstrap pd state\n");
+    cpu_dump(cpu);
+
     munmap(fw_buf, fw_size);
     soc_destroy(&soc);
 }
