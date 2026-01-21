@@ -74,7 +74,6 @@ emul_run(void)
     struct cpu_domain *cpu;
     struct soc_desc soc;
     size_t fw_size;
-    ssize_t n;
     int fw_fd;
 
     if (soc_power_up(&soc) < 0) {
@@ -95,6 +94,12 @@ emul_run(void)
     fw_size = lseek(fw_fd, 0, SEEK_END);
     lseek(fw_fd, 0, SEEK_SET);
 
+    if (fw_size >= DOMAIN_CACHE_SIZE) {
+        trace_error("fatal: firmware overflow\n");
+        close(fw_fd);
+        return;
+    }
+
     /* Map the file */
     fw_buf = mmap(
         NULL,
@@ -111,12 +116,7 @@ emul_run(void)
         return;
     }
 
-    if ((n = balloon_write(&cpu->cache, 0, fw_buf, fw_size)) < 0) {
-        trace_error("failed to write firmware\n");
-        perror("balloon_write");
-        return;
-    }
-
+    mem_write(DOMAIN_LCACHE_BASE, fw_buf, fw_size);
     cache_dump(&cpu->cache);
     munmap(fw_buf, fw_size);
     soc_destroy(&soc);
