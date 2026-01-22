@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2026, Ian Moffett.
+ * Provided under the BSD-3 clause.
+ */
+
+#ifndef ARKI_STATE_H
+#define ARKI_STATE_H 1
+
+#include <stdint.h>
+#include <stddef.h>
+
+/*
+ * Represents the assembler state
+ *
+ * @in_fd: Input file descriptor
+ */
+struct arki_state {
+    int in_fd;
+};
+
+/*
+ * Initialize the assembler state machine
+ *
+ * @state: Assembler state to initialize
+ * @path:  Path of input file
+ *
+ * Returns zero on success
+ */
+int arki_state_init(struct arki_state *state, const char *path);
+
+/*
+ * Close the assembler state machine
+ *
+ * @state: State to close
+ */
+void arki_state_close(struct arki_state *state);
+
+#endif  /* !ARKI_STATE_H  */

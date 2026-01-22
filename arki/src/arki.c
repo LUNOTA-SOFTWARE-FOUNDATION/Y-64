@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include "arki/state.h"
 
 #define ARKI_VERSION "0.0.1"
 
@@ -32,6 +33,20 @@ version(void)
     );
 }
 
+static int
+assemble(const char *path)
+{
+    struct arki_state state;
+
+    if (arki_state_init(&state, path) < 0) {
+        perror("arki_state_init");
+        return -1;
+    }
+
+    arki_state_close(&state);
+    return 0;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -51,6 +66,10 @@ main(int argc, char **argv)
             version();
             return -1;
         }
+    }
+
+    while (optind < argc) {
+        assemble(argv[optind++]);
     }
 
     return 0;
