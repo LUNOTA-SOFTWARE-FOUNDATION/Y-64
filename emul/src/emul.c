@@ -12,7 +12,9 @@
 #include "emul/trace.h"
 #include "emul/balloon.h"
 #include "emul/memctl.h"
+#include "emul/flashrom.h"
 
+#define FLASHROM_DUMP_LEN 128
 #define EMUL_VERSION "0.0.1"
 
 static const char *firmware_path = NULL;
@@ -42,28 +44,24 @@ version(void)
 }
 
 static void
-cache_dump(struct balloon_mem *cache)
+flashrom_dump(void)
 {
-    const size_t N_BYTES = 128;
+    uint8_t buf[FLASHROM_DUMP_LEN];
     size_t i;
 
-    printf("[*] dumping first %zd bytes of lcache", N_BYTES);
+    mem_read(BIOS_FLASHROM_START, buf, sizeof(buf));
+    printf("[*] dumping first %d bytes of BIOS ROM", FLASHROM_DUMP_LEN);
 
-    for (i = 0; i < N_BYTES; ++i) {
-        if (i >= cache->cur_size) {
-            printf("\n[?] output truncated to %zd bytes\n", i);
-            break;
-        }
-
+    for (i = 0; i < FLASHROM_DUMP_LEN; ++i) {
         if ((i % 16) == 0) {
             printf("\n");
             printf("[%08zX] ", i);
         }
 
-        printf("%02X ", cache->buf[i] & 0xFF);
+        printf("%02X ", buf[i] & 0xFF);
     }
 
-    if (i >= N_BYTES) {
+    if (i >= FLASHROM_DUMP_LEN) {
         printf("\n");
     }
 }
@@ -114,16 +112,21 @@ emul_run(void)
     if (fw_buf == NULL) {
         trace_error("failed to open firmware ROM\n");
         perror("mmap");
-        return;
+        goto done;
     }
 
-    mem_write(DOMAIN_LCACHE_BASE, fw_buf, fw_size);
-    cache_dump(&cpu->cache);
+    if (flashrom_flash(fw_buf, fw_size) < 0) {
+        trace_error("failed to flash BIOS ROM\n");
+        goto done;
+    }
 
+    flashrom_dump();
     printf("[*] dumping bootstrap pd state\n");
     cpu_dump(cpu);
 
+done:
     munmap(fw_buf, fw_size);
+    close(fw_fd);
     soc_destroy(&soc);
 }
 
