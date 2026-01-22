@@ -16,8 +16,10 @@
 #define DOMAIN_LCACHE_SIZE 0x1000
 
 /* Valid opcodes */
-#define OPCODE_NOP  0x00        /* No-operation [A] */
-#define OPCODE_HLT  0x0D        /* Halt [A] */
+#define OPCODE_NOP   0x00        /* No-operation [A] */
+#define OPCODE_IMOV  0x01        /* Move wide IMM [C] */
+#define OPCODE_IMOVS 0x03        /* Move short IMM [D] */
+#define OPCODE_HLT   0x0D        /* Halt [A] */
 
 /* Error syndrome types */
 #define ESR_MAV  0x01           /* Memory access violation */

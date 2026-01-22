@@ -86,6 +86,72 @@ cpu_reset(struct cpu_domain *cpu)
     }
 }
 
+/*
+ * Decode a C-type instruction
+ *
+ * @cpu:    CPU domain to decode for
+ * @inst:   Instruction to decode
+ */
+static void
+cpu_decode_ctype(struct cpu_domain *cpu, inst_t *inst)
+{
+    reg_t rd;
+    uint64_t imm;
+
+    if (cpu == NULL || inst == NULL) {
+        return;
+    }
+
+    rd = (inst->raw >> 8) & 0xFF;
+    imm = (inst->raw >> 16) & 0xFFFFFFFFFFFF;
+
+    /* Is this a valid register? */
+    if (rd >= REG_MAX) {
+        cpu->esr = ESR_PV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    switch (inst->opcode) {
+    case OPCODE_IMOV:
+        cpu->regbank[rd] = imm;
+        break;
+    }
+}
+
+/*
+ * Decode a D-type instruction
+ *
+ * @cpu:    CPU domain to decode for
+ * @inst:   Instruction to decode
+ */
+static void
+cpu_decode_dtype(struct cpu_domain *cpu, inst_t *inst)
+{
+    reg_t rd;
+    uint64_t imm;
+
+    if (cpu == NULL || inst == NULL) {
+        return;
+    }
+
+    rd = (inst->raw >> 8) & 0xFF;
+    imm = (inst->raw >> 16) & 0xFFFF;
+
+    /* Is this a valid register? */
+    if (rd >= REG_MAX) {
+        cpu->esr = ESR_PV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    switch (inst->opcode) {
+    case OPCODE_IMOVS:
+        cpu->regbank[rd] = imm;
+        break;
+    }
+}
+
 void
 cpu_raise_int(struct cpu_domain *cpu, uint8_t vector)
 {
@@ -170,6 +236,14 @@ cpu_run(struct cpu_domain *cpu)
         case OPCODE_HLT:
             printf("[*] processor halted\n");
             return;
+        case OPCODE_IMOV:
+            cpu_decode_ctype(cpu, &inst);
+            cpu->regbank[REG_PC] += 8;
+            break;
+        case OPCODE_IMOVS:
+            cpu_decode_dtype(cpu, &inst);
+            cpu->regbank[REG_PC] += 4;
+            break;
         default:
             cpu->esr = ESR_UD;
             cpu_raise_int(cpu, IVEC_SYNC);
