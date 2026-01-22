@@ -8,14 +8,17 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "arki/ptrbox.h"
 
 /*
  * Represents the assembler state
  *
- * @in_fd: Input file descriptor
+ * @in_fd:   Input file descriptor
+ * @ptrbox:  Global pointer box
  */
 struct arki_state {
     int in_fd;
+    struct ptrbox ptrbox;
 };
 
 /*

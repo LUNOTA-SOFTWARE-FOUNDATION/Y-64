@@ -21,6 +21,11 @@ arki_state_init(struct arki_state *state, const char *path)
         return -1;
     }
 
+    if (ptrbox_init(&state->ptrbox) < 0) {
+        close(state->in_fd);
+        return -1;
+    }
+
     return 0;
 }
 
@@ -32,4 +37,5 @@ arki_state_close(struct arki_state *state)
     }
 
     close(state->in_fd);
+    ptrbox_destroy(&state->ptrbox);
 }
