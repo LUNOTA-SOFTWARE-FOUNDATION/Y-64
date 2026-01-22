@@ -19,6 +19,15 @@
 #define OPCODE_NOP  0x00        /* No-operation [A] */
 #define OPCODE_HLT  0x0D        /* Halt [A] */
 
+/* Error syndrome types */
+#define ESR_MAV  0x01           /* Memory access violation */
+#define ESR_PV   0x02           /* Protection violation */
+#define ESR_UD   0x03           /* Undefined opcode */
+
+/* Interrupt vectors */
+#define IVEC_SYNC   0x00          /* Synchronous */
+#define IVEC_ASYNC  0x01          /* Asynchronous */
+
 /*
  * Register identifiers
  */
@@ -67,17 +76,29 @@ typedef union {
  * @domain_id: ID of this PD
  * @cache:     PD local cache
  * @regbank:   Register bank of this PD
+ * @itr:       Interrupt table register
+ * @esr:       Error syndrome register
  */
 struct cpu_domain {
     uint32_t domain_id;
     struct balloon_mem cache;
     uint64_t regbank[REG_MAX];
+    uint64_t itr;
+    uint64_t esr;
 };
 
 /*
  * Power-up a processing domain
  */
 int cpu_power_up(struct cpu_domain *cpu);
+
+/*
+ * Raise an interrupt on a specific PD
+ *
+ * @cpu:    PD to raise interrupt on
+ * @vector: Interrupt vector to raise
+ */
+void cpu_raise_int(struct cpu_domain *cpu, uint8_t vector);
 
 /*
  * Dump a processor descriptor

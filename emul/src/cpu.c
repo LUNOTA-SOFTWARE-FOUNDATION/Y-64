@@ -87,6 +87,22 @@ cpu_reset(struct cpu_domain *cpu)
 }
 
 void
+cpu_raise_int(struct cpu_domain *cpu, uint8_t vector)
+{
+    if (cpu == NULL) {
+        return;
+    }
+
+    if (cpu->itr == 0) {
+        trace_error("itr invalid - asserting reset...\n");
+        cpu_reset(cpu);
+        return;
+    }
+
+    /* TODO: Queue up interrupts */
+}
+
+void
 cpu_dump(struct cpu_domain *cpu)
 {
     if (cpu == NULL) {
@@ -155,8 +171,9 @@ cpu_run(struct cpu_domain *cpu)
             printf("[*] processor halted\n");
             return;
         default:
-            trace_error("undefined opcode %08X\n", inst.opcode);
-            return;
+            cpu->esr = ESR_UD;
+            cpu_raise_int(cpu, IVEC_SYNC);
+            continue;
         }
 
         printf("[*] cycle %zd completed\n", cycle_count++);
