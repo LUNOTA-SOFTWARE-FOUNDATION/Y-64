@@ -82,6 +82,7 @@ typedef union {
  * @regbank:   Register bank of this PD
  * @itr:       Interrupt table register
  * @esr:       Error syndrome register
+ * @n_cycles:  Number of cycles completed
  */
 struct cpu_domain {
     uint32_t domain_id;
@@ -89,6 +90,7 @@ struct cpu_domain {
     uint64_t regbank[REG_MAX];
     uint64_t itr;
     uint64_t esr;
+    size_t n_cycles;
 };
 
 /*

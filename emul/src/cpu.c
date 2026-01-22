@@ -78,6 +78,8 @@ lcache_read(struct bus_peer *bp, uintptr_t addr, void *buf, size_t n)
 static void
 cpu_reset(struct cpu_domain *cpu)
 {
+    cpu->n_cycles = 0;
+
     /* Put all registers to their reset state */
     for (int i = 0; i < REG_MAX; ++i) {
         cpu->regbank[i] = (i <= REG_A7)
@@ -221,7 +223,7 @@ cpu_power_up(struct cpu_domain *cpu)
 void
 cpu_run(struct cpu_domain *cpu)
 {
-    ssize_t count, cycle_count = 0;
+    ssize_t count;
     inst_t inst;
 
     if (cpu == NULL) {
@@ -258,7 +260,7 @@ cpu_run(struct cpu_domain *cpu)
             continue;
         }
 
-        printf("[*] cycle %zd completed\n", cycle_count++);
+        printf("[*] cycle %zd completed\n", cpu->n_cycles++);
         cpu_dump(cpu);
     }
 }
