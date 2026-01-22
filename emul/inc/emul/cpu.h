@@ -9,7 +9,7 @@
 #include "emul/balloon.h"
 
 /* Maximum local cache size */
-#define DOMAIN_CACHE_SIZE 32768
+#define DOMAIN_CACHE_SIZE 65536
 
 /* Address of lcache MMIO */
 #define DOMAIN_LCACHE_BASE 0x00100000
