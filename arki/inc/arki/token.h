@@ -17,6 +17,7 @@ typedef enum {
     TT_IDENT,       /* <IDENT> */
     TT_COMMA,       /* ',' */
     TT_NEWLINE,     /* '\n' */
+    TT_MOV,         /* 'mov' */
 } tt_t;
 
 /*

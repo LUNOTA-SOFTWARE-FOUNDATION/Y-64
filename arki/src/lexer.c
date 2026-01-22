@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <ctype.h>
 #include <errno.h>
 #include <unistd.h>
@@ -118,6 +119,40 @@ lexer_scan_ident(struct arki_state *state, int lc, struct token *res)
     return 0;
 }
 
+/*
+ * Check if a token is actually a keyword and overwrite it if
+ * so
+ *
+ * @tok: Token to check
+ *
+ * Returns zero on successful overwrite
+ */
+static int
+lexer_check_kw(struct token *tok)
+{
+    if (tok == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (tok->type != TT_IDENT) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    switch (*tok->s) {
+    case 'm':
+        if (strcmp(tok->s, "mov") == 0) {
+            tok->type = TT_MOV;
+            return 0;
+        }
+
+        break;
+    }
+
+    return -1;
+}
+
 int
 lexer_scan(struct arki_state *state, struct token *res)
 {
@@ -142,6 +177,7 @@ lexer_scan(struct arki_state *state, struct token *res)
         return 0;
     default:
         if (lexer_scan_ident(state, c, res) == 0) {
+            lexer_check_kw(res);
             return 0;
         }
 
