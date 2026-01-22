@@ -75,6 +75,17 @@ lcache_read(struct bus_peer *bp, uintptr_t addr, void *buf, size_t n)
     );
 }
 
+static void
+cpu_reset(struct cpu_domain *cpu)
+{
+    /* Put all registers to their reset state */
+    for (int i = 0; i < REG_MAX; ++i) {
+        cpu->regbank[i] = (i <= REG_A7)
+            ? 0x1A1F1A1F1A1F1A1F
+            : 0;
+    }
+}
+
 void
 cpu_dump(struct cpu_domain *cpu)
 {
@@ -115,13 +126,7 @@ cpu_power_up(struct cpu_domain *cpu)
         return -1;
     }
 
-    /* Put all registers to their reset state */
-    for (int i = 0; i < REG_MAX; ++i) {
-        cpu->regbank[i] = (i <= REG_A7)
-            ? 0x1A1F1A1F1A1F1A1F
-            : 0;
-    }
-
+    cpu_reset(cpu);
     return 0;
 }
 
