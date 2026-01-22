@@ -34,6 +34,22 @@ lexer_is_ws(char c)
 }
 
 /*
+ * Place a given character into the lexer putback buffer
+ *
+ * @state: Assembler state
+ * @c:     Character to insert
+ */
+static inline void
+lexer_putback(struct arki_state *state, char c)
+{
+    if (state == NULL) {
+        return;
+    }
+
+    state->putback = c;
+}
+
+/*
  * Consume a single byte from the input file
  *
  * @state:   Assembler state
@@ -46,6 +62,17 @@ static char
 lexer_consume(struct arki_state *state, bool skip_ws)
 {
     char c;
+
+    /* Is this anything in the putback buffer? */
+    if (state->putback != '\0') {
+        c = state->putback;
+        state->putback = '\0';
+
+        if (lexer_is_ws(c) && !skip_ws)
+            return c;
+        if (!lexer_is_ws(c))
+            return c;
+    }
 
     /* Begin reading bytes and skip whitespace if we can */
     while (read(state->in_fd, &c, 1) > 0) {
@@ -205,12 +232,14 @@ lexer_scan_number(struct arki_state *state, int lc, struct token *res)
         if (base == 16 && !isxdigit(c)) {
             if (c == '_') continue;
             buf[bufind] = '\0';
+            lexer_putback(state, c);
             break;
         }
 
         if (base == 10 && !isdigit(c)) {
             if (c == '_') continue;
             buf[bufind] = '\0';
+            lexer_putback(state, c);
             break;
         }
 
