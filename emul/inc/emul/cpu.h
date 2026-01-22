@@ -61,6 +61,13 @@ typedef union {
     uint64_t raw;
 } inst_t;
 
+/*
+ * Represents a processing domain (PD)
+ *
+ * @domain_id: ID of this PD
+ * @cache:     PD local cache
+ * @regbank:   Register bank of this PD
+ */
 struct cpu_domain {
     uint32_t domain_id;
     struct balloon_mem cache;
