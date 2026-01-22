@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "arki/state.h"
+#include "arki/parser.h"
 
 #define ARKI_VERSION "0.0.1"
 
@@ -40,6 +41,10 @@ assemble(const char *path)
 
     if (arki_state_init(&state, path) < 0) {
         perror("arki_state_init");
+        return -1;
+    }
+
+    if (arki_parse(&state) < 0) {
         return -1;
     }
 
