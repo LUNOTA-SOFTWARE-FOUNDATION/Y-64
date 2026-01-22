@@ -10,3 +10,7 @@ all: $(OFILES)
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
+
+.PHONY: all
+clean:
+	rm -f $(OFILES)
