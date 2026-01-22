@@ -14,6 +14,7 @@
  */
 typedef enum {
     TT_NONE,        /* <NONE> */
+    TT_IDENT,       /* <IDENT> */
     TT_COMMA,       /* ',' */
     TT_NEWLINE,     /* '\n' */
 } tt_t;
@@ -26,6 +27,7 @@ struct token {
     union {
         char c;
         ssize_t v;
+        char *s;
     };
 };
 

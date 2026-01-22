@@ -31,6 +31,7 @@
  */
 static const char *toktab[] = {
     [TT_NONE]       = symtok("none"),
+    [TT_IDENT]      = symtok("ident"),
     [TT_COMMA]      = qtok(","),
     [TT_NEWLINE]    = symtok("newline")
 };
