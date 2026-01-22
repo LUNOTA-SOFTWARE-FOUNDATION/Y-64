@@ -15,6 +15,7 @@
 typedef enum {
     TT_NONE,        /* <NONE> */
     TT_IDENT,       /* <IDENT> */
+    TT_NUMBER,      /* <NUMBER> */
     TT_COMMA,       /* ',' */
     TT_NEWLINE,     /* '\n' */
     TT_MOV,         /* 'mov' */

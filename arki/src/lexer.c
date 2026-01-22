@@ -153,6 +153,78 @@ lexer_check_kw(struct token *tok)
     return -1;
 }
 
+/*
+ * Scan for a number token
+ *
+ * @state:  Assembler state
+ * @lc:     Last token
+ * @tok:    Token result
+ */
+static int
+lexer_scan_number(struct arki_state *state, int lc, struct token *res)
+{
+    char buf[24];
+    size_t bufind = 0;
+    uint8_t base = 10;
+    char c;
+
+    if (state == NULL || res == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (!isdigit(lc)) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    /*
+     * If we have a '0' prefix, then we are using a non base-10
+     * numerical:
+     *
+     * 'x')
+     *      Base-16
+     */
+    if (lc == '0') {
+        c = lexer_consume(state, false);
+        if (c == 'x') {
+            base = 16;
+            c = lexer_consume(state, false);
+        }
+    }
+
+    if (lc != '0') {
+        buf[bufind++] = lc;
+    } else {
+        buf[bufind++] = c;
+    }
+
+    for (;;) {
+        c = lexer_consume(state, false);
+        if (base == 16 && !isxdigit(c)) {
+            if (c == '_') continue;
+            buf[bufind] = '\0';
+            break;
+        }
+
+        if (base == 10 && !isdigit(c)) {
+            if (c == '_') continue;
+            buf[bufind] = '\0';
+            break;
+        }
+
+        buf[bufind++] = c;
+        if (bufind >= sizeof(buf) - 1) {
+            buf[bufind] = '\0';
+            break;
+        }
+    }
+
+    res->type = TT_NUMBER;
+    res->v = strtol(buf, NULL, base);
+    return 0;
+}
+
 int
 lexer_scan(struct arki_state *state, struct token *res)
 {
@@ -178,6 +250,10 @@ lexer_scan(struct arki_state *state, struct token *res)
     default:
         if (lexer_scan_ident(state, c, res) == 0) {
             lexer_check_kw(res);
+            return 0;
+        }
+
+        if (lexer_scan_number(state, c, res) == 0) {
             return 0;
         }
 
