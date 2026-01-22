@@ -8,6 +8,7 @@
 #include "arki/parser.h"
 #include "arki/token.h"
 #include "arki/lexer.h"
+#include "arki/trace.h"
 
 /* Convert token type to string */
 #define tokstr1(tt) \
@@ -25,6 +26,30 @@
 #define symtok(tokstr) \
     "<" tokstr ">"
 
+/* Unexpected token */
+#define utok(state, tok)            \
+    trace_error(                    \
+        (state),                    \
+        "unexpected token %s\n",    \
+        tokstr(tok)                 \
+    );
+
+/* Unexpected token */
+#define utok1(state, exp, got)           \
+    trace_error(                         \
+        (state),                         \
+        "expected %s, got %s instead\n", \
+        (exp),                           \
+        (got)                            \
+    );
+
+/* Unexpected EOF */
+#define ueof(state)                     \
+    trace_error(                        \
+        (state),                        \
+        "unexpected end of of file\n"   \
+    )
+
 /*
  * A lookup table used to convert token types into
  * human readable strings
@@ -38,6 +63,127 @@ static const char *toktab[] = {
     [TT_MOV]        = qtok("mov")
 };
 
+/*
+ * Parser-side token scan function
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ *
+ * Returns zero on success
+ */
+static int
+parse_scan(struct arki_state *state, struct token *tok)
+{
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (lexer_scan(state, tok) < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Assert that the next token is of a specific type
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @what:   Token to expect
+ */
+static int
+parse_expect(struct arki_state *state, struct token *tok, tt_t what)
+{
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    if (tok->type != what) {
+        utok1(state, tokstr1(what), tokstr(tok));
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Parse a 'mov' instruction
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ *
+ * Returns zero on success
+ */
+static int
+parse_mov(struct arki_state *state, struct token *tok)
+{
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_MOV) {
+        return -1;
+    }
+
+    /* TODO: This needs to be a register */
+    if (parse_expect(state, tok, TT_IDENT) < 0) {
+        return -1;
+    }
+
+    if (parse_expect(state, tok, TT_COMMA) < 0) {
+        return -1;
+    }
+
+    if (parse_expect(state, tok, TT_NUMBER) < 0) {
+        return -1;
+    }
+
+    if (parse_expect(state, tok, TT_NEWLINE) < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Parse the last token
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ *
+ * Returns zero on susccess
+ */
+static int
+parse_begin(struct arki_state *state, struct token *tok)
+{
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    switch (tok->type) {
+    case TT_MOV:
+        if (parse_mov(state, tok) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_NEWLINE:
+        /* Ignored */
+        break;
+    default:
+        utok(state, tok);
+        return -1;
+    }
+
+    return 0;
+}
+
 int
 arki_parse(struct arki_state *state)
 {
@@ -46,7 +192,9 @@ arki_parse(struct arki_state *state)
     }
 
     while (lexer_scan(state, &state->last_tok) == 0) {
-        printf("got token %s\n", tokstr(&state->last_tok));
+        if (parse_begin(state, &state->last_tok) < 0) {
+            return -1;
+        }
     }
 
     return 0;
