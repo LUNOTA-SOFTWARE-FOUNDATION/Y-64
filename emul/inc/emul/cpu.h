@@ -20,6 +20,7 @@
 #define OPCODE_IMOV  0x01        /* Move wide IMM [C] */
 #define OPCODE_IMOVS 0x03        /* Move short IMM [D] */
 #define OPCODE_IADD  0x05        /* IMM register ADD [D] */
+#define OPCODE_ISUB  0x07        /* IMM register SUB [D] */
 #define OPCODE_HLT   0x0D        /* Halt [A] */
 
 /* Error syndrome types */

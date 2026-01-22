@@ -152,6 +152,9 @@ cpu_decode_dtype(struct cpu_domain *cpu, inst_t *inst)
     case OPCODE_IADD:
         cpu->regbank[rd] += imm;
         break;
+    case OPCODE_ISUB:
+        cpu->regbank[rd] -= imm;
+        break;
     }
 }
 
@@ -245,6 +248,7 @@ cpu_run(struct cpu_domain *cpu)
             break;
         case OPCODE_IADD:
         case OPCODE_IMOVS:
+        case OPCODE_ISUB:
             cpu_decode_dtype(cpu, &inst);
             cpu->regbank[REG_PC] += 4;
             break;
