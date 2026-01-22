@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include "arki/lexer.h"
 #include "arki/ptrbox.h"
+#include "arki/trace.h"
 
 /*
  * Returns true if the given character counts
@@ -244,6 +245,7 @@ lexer_scan(struct arki_state *state, struct token *res)
         res->c = c;
         return 0;
     case '\n':
+        ++state->line_num;
         res->type = TT_NEWLINE;
         res->c = c;
         return 0;
@@ -257,7 +259,7 @@ lexer_scan(struct arki_state *state, struct token *res)
             return 0;
         }
 
-        printf("fatal: unexpected token '%c'\n", c);
+        trace_error(state, "unexpected token '%c'\n", c);
         break;
     }
 

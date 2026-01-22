@@ -17,11 +17,13 @@
  * @in_fd:      Input file descriptor
  * @ptrbox:     Global pointer box
  * @last_tok:   Last token
+ * @line_num:   Current line number
  */
 struct arki_state {
     int in_fd;
     struct ptrbox ptrbox;
     struct token last_tok;
+    size_t line_num;
 };
 
 /*

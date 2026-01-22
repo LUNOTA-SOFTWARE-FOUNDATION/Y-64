@@ -28,6 +28,7 @@ arki_state_init(struct arki_state *state, const char *path)
         return -1;
     }
 
+    state->line_num = 1;
     return 0;
 }
 
