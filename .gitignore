@@ -2,3 +2,4 @@
 *.o
 /test/obj_dir
 /emul/y64emu
+/arki/arki
