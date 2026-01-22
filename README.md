@@ -13,12 +13,6 @@ toolchains, hardware descriptions, etc).
 - sv/:   System verilog hardware descriptions
 - test/: SoC verilog testbenches
 
-## Specification classes
-
-- Class 0: Instruction set architecture
-- Class 1: Firmware and system software guide
-- Class 2: Processor internals
-
 ## Chip series
 
 - Y-64A: First generation of Y-64 chips, targeting embedded systems [LATEST]
