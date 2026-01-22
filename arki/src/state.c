@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include "arki/state.h"
@@ -17,6 +18,7 @@ arki_state_init(struct arki_state *state, const char *path)
         return -1;
     }
 
+    memset(state, 0, sizeof(*state));
     if ((state->in_fd = open(path, O_RDONLY)) < 0) {
         return -1;
     }
