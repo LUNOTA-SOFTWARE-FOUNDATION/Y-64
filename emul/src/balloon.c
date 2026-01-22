@@ -70,6 +70,9 @@ balloon_write(struct balloon_mem *bp, uintptr_t addr, const void *buf, size_t n)
 ssize_t
 balloon_read(struct balloon_mem *bp, uintptr_t addr, void *buf, size_t n)
 {
+    char *dest;
+    size_t pad_len;
+
     if (bp == NULL || buf == NULL) {
         errno = -EINVAL;
         return -1;
@@ -85,10 +88,14 @@ balloon_read(struct balloon_mem *bp, uintptr_t addr, void *buf, size_t n)
         return n;
     }
 
-    /* TODO: Read zeros when past cur_size */
+    /* Does this overlap past the expansion point? */
     if ((addr + n) >= bp->cur_size) {
-        errno = -EIO;
-        return -1;
+        dest = (char *)buf;
+        memcpy(buf, &bp->buf[addr], bp->cur_size);
+
+        pad_len = (addr + n) - bp->cur_size;
+        memset(&dest[bp->cur_size], 0, pad_len);
+        return 0;
     }
 
     memcpy(buf, &bp->buf[addr], n);
