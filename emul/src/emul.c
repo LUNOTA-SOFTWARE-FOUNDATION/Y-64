@@ -123,7 +123,7 @@ emul_run(void)
     flashrom_dump();
     printf("[*] dumping bootstrap pd state\n");
     cpu_dump(cpu);
-
+    cpu_run(cpu);
 done:
     munmap(fw_buf, fw_size);
     close(fw_fd);

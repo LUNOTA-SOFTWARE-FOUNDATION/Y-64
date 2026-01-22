@@ -10,6 +10,7 @@
 #include "emul/cpu.h"
 #include "emul/trace.h"
 #include "emul/busctl.h"
+#include "emul/memctl.h"
 
 /* Local cache peer */
 static struct bus_peer lcache_peer;
@@ -122,6 +123,40 @@ cpu_power_up(struct cpu_domain *cpu)
     }
 
     return 0;
+}
+
+void
+cpu_run(struct cpu_domain *cpu)
+{
+    ssize_t count, cycle_count = 0;
+    inst_t inst;
+
+    if (cpu == NULL) {
+        return;
+    }
+
+    for (;;) {
+        count = mem_read(cpu->regbank[REG_PC], &inst, sizeof(inst));
+        if (count < 0) {
+            trace_error("instruction fetch failure\n");
+            return;
+        }
+
+        switch (inst.opcode) {
+        case OPCODE_NOP:
+            cpu->regbank[REG_PC] += 1;
+            break;
+        case OPCODE_HLT:
+            printf("[*] processor halted\n");
+            return;
+        default:
+            trace_error("undefined opcode %08X\n", inst.opcode);
+            return;
+        }
+
+        printf("[*] cycle %zd completed\n", cycle_count++);
+        cpu_dump(cpu);
+    }
 }
 
 void

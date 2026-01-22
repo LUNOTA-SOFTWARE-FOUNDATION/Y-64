@@ -15,6 +15,10 @@
 #define DOMAIN_LCACHE_BASE 0x00100000
 #define DOMAIN_LCACHE_SIZE 0x1000
 
+/* Valid opcodes */
+#define OPCODE_NOP  0x00        /* No-operation [A] */
+#define OPCODE_HLT  0x0D        /* Halt [A] */
+
 /*
  * Register identifiers
  */
@@ -42,6 +46,21 @@ typedef enum {
     REG_MAX
 } reg_t;
 
+/*
+ * Represents an instruction
+ *
+ * @opcode:  Opcode portion
+ * @operand: Operand portion
+ * @raw:     Raw value
+ */
+typedef union {
+    struct {
+        uint8_t opcode;
+        uint64_t operand : 56;
+    };
+    uint64_t raw;
+} inst_t;
+
 struct cpu_domain {
     uint32_t domain_id;
     struct balloon_mem cache;
@@ -57,6 +76,11 @@ int cpu_power_up(struct cpu_domain *cpu);
  * Dump a processor descriptor
  */
 void cpu_dump(struct cpu_domain *cpu);
+
+/*
+ * Begin processor execution and let PC tick
+ */
+void cpu_run(struct cpu_domain *cpu);
 
 /*
  * Deallocate resources associated with a processing
