@@ -334,6 +334,96 @@ parse_srw(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse the 'or' instruction
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_or(struct arki_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *left, *root, *right;
+    reg_t rd, rs;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_OR) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_OR, &root) < 0) {
+        trace_error(state, "failed to allocate AST_OR\n");
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    /* EXPECT <register> */
+    if ((rd = token_to_reg(tok->type)) == REG_BAD) {
+        utok1(state, symtok("register"), tokstr(tok));
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_REG, &left) < 0) {
+        trace_error(state, "failed to allocate AST_REG\n");
+        return -1;
+    }
+
+    /* EXPECT ',' */
+    if (parse_expect(state, tok, TT_COMMA) < 0) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    left->reg = rd;
+    switch (tok->type) {
+    case TT_NUMBER:
+        if (ast_alloc_node(state, AST_NUMBER, &right) < 0) {
+            trace_error(state, "failed to allocate AST_NUMBER\nn");
+            return -1;
+        }
+
+        right->v = tok->v;
+        break;
+    default:
+        /* EXPECT <register> */
+        if ((rs = token_to_reg(tok->type)) == REG_BAD) {
+            utok1(state, symtok("register"), tokstr(tok));
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_REG, &right) < 0) {
+            trace_error(state, "failed to allocate AST_REG\n");
+            return -1;
+        }
+
+        right->reg = rs;
+        break;
+    }
+
+    root->left = left;
+    root->right = right;
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the last token
  *
  * @state:  Assembler state
@@ -371,6 +461,12 @@ parse_begin(struct arki_state *state, struct token *tok)
         break;
     case TT_SRW:
         if (parse_srw(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_OR:
+        if (parse_or(state, tok, &root) < 0) {
             return -1;
         }
 

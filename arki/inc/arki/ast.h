@@ -20,6 +20,7 @@
  * @AST_HLT:    This node is a 'HLT' instruction
  * @AST_SRR:    This node is a 'SRR' instruction
  * @AST_SRW:    This node is a 'SRW' instruction
+ * @AST_OR:     This node is a 'OR' instruction
  * @AST_NUMBER: This node is a number
  * @AST_REG:    This node is a register
  */
@@ -29,6 +30,7 @@ typedef enum {
     AST_HLT,
     AST_SRR,
     AST_SRW,
+    AST_OR,
     AST_NUMBER,
     AST_REG,
 } ast_type_t;
