@@ -22,6 +22,8 @@
 #define OPCODE_IADD  0x05        /* IMM register ADD [D] */
 #define OPCODE_ISUB  0x07        /* IMM register SUB [D] */
 #define OPCODE_HLT   0x0D        /* Halt [A] */
+#define OPCODE_SRR   0x0E        /* Special register read [A] */
+#define OPCODE_SRW   0x0F        /* Special register write [A] */
 
 /* Error syndrome types */
 #define ESR_MAV  0x01           /* Memory access violation */
@@ -60,6 +62,18 @@ typedef enum {
 } reg_t;
 
 /*
+ * Special registers
+ *
+ * @SREG_BAD:       Bad register
+ * @SREG_INTCONF:   Interrupt configuration
+ */
+typedef enum {
+    SREG_BAD,
+    SREG_INTCONF,
+    SREG_MAX
+} sreg_t;
+
+/*
  * Represents an instruction
  *
  * @opcode:  Opcode portion
@@ -83,6 +97,7 @@ typedef union {
  * @itr:       Interrupt table register
  * @esr:       Error syndrome register
  * @n_cycles:  Number of cycles completed
+ * @sreg:      Special registers
  */
 struct cpu_domain {
     uint32_t domain_id;
@@ -91,6 +106,7 @@ struct cpu_domain {
     uint64_t itr;
     uint64_t esr;
     size_t n_cycles;
+    uint64_t sreg[SREG_MAX];
 };
 
 /*

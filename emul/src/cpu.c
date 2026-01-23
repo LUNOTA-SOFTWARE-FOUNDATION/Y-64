@@ -39,6 +39,54 @@ static const char *regstr[] = {
     [REG_PC] = "PC"
 };
 
+/*
+ * Read a special register
+ *
+ * @cpu: PD of special register to read
+ * @reg: Special register to read
+ *
+ * Returns the value within on success, raises a PV# on
+ * failure.
+ */
+static uint64_t
+cpu_sreg_read(struct cpu_domain *cpu, sreg_t reg)
+{
+    if (cpu == NULL) {
+        return 0;
+    }
+
+    if (reg == SREG_BAD) {
+        cpu->esr = ESR_PV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return 0;
+    }
+
+    return cpu->sreg[reg - 1];
+}
+
+/*
+ * Write to a special register
+ *
+ * @cpu: PD of special register to write
+ * @reg: Special register to write to
+ * @v:   Value to write
+ */
+static void
+cpu_sreg_write(struct cpu_domain *cpu, sreg_t reg, uint64_t v)
+{
+    if (cpu == NULL) {
+        return;
+    }
+
+    if (reg == SREG_BAD) {
+        cpu->esr = ESR_PV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    cpu->sreg[reg - 1] = v;
+}
+
 static ssize_t
 lcache_write(struct bus_peer *bp, uintptr_t addr, const void *buf, size_t n)
 {
@@ -86,6 +134,8 @@ cpu_reset(struct cpu_domain *cpu)
             ? 0x1A1F1A1F1A1F1A1F
             : 0;
     }
+
+    memset(cpu->sreg, 0, sizeof(cpu->sreg));
 }
 
 /*
@@ -158,6 +208,46 @@ cpu_decode_dtype(struct cpu_domain *cpu, inst_t *inst)
         cpu->regbank[rd] -= imm;
         break;
     }
+}
+
+/*
+ * Read a special register
+ *
+ * @cpu: Current PD
+ */
+static void
+cpu_srr(struct cpu_domain *cpu)
+{
+    sreg_t sreg;
+
+    if (cpu == NULL) {
+        return;
+    }
+
+    sreg = cpu->regbank[REG_G1];
+    cpu->regbank[REG_G0] = cpu_sreg_read(cpu, sreg);
+}
+
+/*
+ * Write a special register
+ *
+ * @cpu: Current PD
+ */
+static void
+cpu_srw(struct cpu_domain *cpu)
+{
+    sreg_t sreg;
+
+    if (cpu == NULL) {
+        return;
+    }
+
+    sreg = cpu->regbank[REG_G1];
+    cpu_sreg_write(
+        cpu,
+        sreg,
+        cpu->regbank[REG_G0]
+    );
 }
 
 void
@@ -244,6 +334,14 @@ cpu_run(struct cpu_domain *cpu)
         case OPCODE_HLT:
             printf("[*] processor halted\n");
             return;
+        case OPCODE_SRR:
+            cpu_srr(cpu);
+            cpu->regbank[REG_PC] += 1;
+            break;
+        case OPCODE_SRW:
+            cpu_srw(cpu);
+            cpu->regbank[REG_PC] += 1;
+            break;
         case OPCODE_IMOV:
             cpu_decode_ctype(cpu, &inst);
             cpu->regbank[REG_PC] += 8;
