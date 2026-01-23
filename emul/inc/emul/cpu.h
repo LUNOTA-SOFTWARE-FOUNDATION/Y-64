@@ -6,7 +6,10 @@
 #ifndef EMUL_CPU_H
 #define EMUL_CPU_H 1
 
+#include <sys/queue.h>
+#include <stdint.h>
 #include "emul/balloon.h"
+#include "emul/defs.h"
 
 /* Maximum local cache size */
 #define DOMAIN_CACHE_SIZE 65536
@@ -25,11 +28,13 @@
 #define OPCODE_SRR   0x0E        /* Special register read [A] */
 #define OPCODE_SRW   0x0F        /* Special register write [A] */
 #define OPCODE_IOR   0x10        /* IMM bitwise OR [D] */
+#define OPCODE_LITR  0x14        /* Load ITR */
 
 /* Error syndrome types */
 #define ESR_MAV  0x01           /* Memory access violation */
 #define ESR_PV   0x02           /* Protection violation */
 #define ESR_UD   0x03           /* Undefined opcode */
+#define ESR_IENP 0x04           /* Interrupt entry not present */
 
 /* Interrupt vectors */
 #define IVEC_SYNC   0x00          /* Synchronous */
@@ -90,6 +95,17 @@ typedef union {
 } inst_t;
 
 /*
+ * Interrupt service table entry
+ */
+struct PACKED ist_entry {
+    uint8_t p : 1;
+    uint8_t zero;
+    uint8_t reserved;
+    uint64_t isr;
+    uint16_t zero1 : 15;
+};
+
+/*
  * Represents a processing domain (PD)
  *
  * @domain_id: ID of this PD
@@ -97,6 +113,7 @@ typedef union {
  * @regbank:   Register bank of this PD
  * @itr:       Interrupt table register
  * @esr:       Error syndrome register
+ * @sync_vec:  Pending synchronous interrupt vector
  * @n_cycles:  Number of cycles completed
  * @sreg:      Special registers
  */
@@ -106,6 +123,7 @@ struct cpu_domain {
     uint64_t regbank[REG_MAX];
     uint64_t itr;
     uint64_t esr;
+    uint8_t sync_vec;
     size_t n_cycles;
     uint64_t sreg[SREG_MAX];
 };

@@ -135,6 +135,7 @@ cpu_reset(struct cpu_domain *cpu)
             : 0;
     }
 
+    cpu->sync_vec = 0xFF;
     memset(cpu->sreg, 0, sizeof(cpu->sreg));
 }
 
@@ -213,6 +214,31 @@ cpu_decode_dtype(struct cpu_domain *cpu, inst_t *inst)
     }
 }
 
+static void
+cpu_decode_etype(struct cpu_domain *cpu, inst_t *inst)
+{
+    reg_t rs;
+
+    if (cpu == NULL || inst == NULL) {
+        return;
+    }
+
+    rs = (inst->raw >> 8) & 0xFF;
+
+    /* Is the source register valid? */
+    if (rs >= REG_MAX) {
+        cpu->esr = ESR_PV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    switch (inst->opcode) {
+    case OPCODE_LITR:
+        cpu->itr = cpu->regbank[rs];
+        break;
+    }
+}
+
 /*
  * Read a special register
  *
@@ -253,6 +279,64 @@ cpu_srw(struct cpu_domain *cpu)
     );
 }
 
+/*
+ * Service an interrupt vector
+ *
+ * @cpu: Current PD
+ * @vec: Vector to service
+ */
+static void
+cpu_service_vec(struct cpu_domain *cpu, uint8_t vec)
+{
+    struct ist_entry entry;
+
+    if (cpu == NULL || vec == 0xFF) {
+        return;
+    }
+
+    printf("[*] got interrupt [vector=%x]\n", vec);
+    if (cpu->itr == 0) {
+        trace_error("itr invalid - asserting reset...\n");
+        cpu_reset(cpu);
+        return;
+    }
+
+    if (mem_read(cpu->itr, &entry, sizeof(entry)) < 0) {
+        cpu->esr = ESR_MAV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    if (entry.p == 0) {
+        cpu->esr = ESR_IENP;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    cpu->regbank[REG_PC] = entry.isr;
+}
+
+/*
+ * Check if a synchronous interrupt is available to
+ * be serviced
+ *
+ * @cpu: Current PD
+ */
+static void
+cpu_poll_sync(struct cpu_domain *cpu)
+{
+    uint8_t vector;
+
+    if (cpu == NULL) {
+        return;
+    }
+
+    if ((vector = cpu->sync_vec) != 0xFF) {
+        cpu->sync_vec = 0xFF;
+        cpu_service_vec(cpu, vector);
+    }
+}
+
 void
 cpu_raise_int(struct cpu_domain *cpu, uint8_t vector)
 {
@@ -260,13 +344,16 @@ cpu_raise_int(struct cpu_domain *cpu, uint8_t vector)
         return;
     }
 
-    if (cpu->itr == 0) {
-        trace_error("itr invalid - asserting reset...\n");
-        cpu_reset(cpu);
+    /*
+     * The processor does not need to queue up asynchronous
+     * interrupts as they result from the current instruction.
+     */
+    if (vector == IVEC_SYNC) {
+        cpu->sync_vec = vector;
         return;
     }
 
-    /* TODO: Queue up interrupts */
+    /* TODO: Queue up asynchronous events */
 }
 
 void
@@ -284,7 +371,7 @@ cpu_dump(struct cpu_domain *cpu)
         printf("%s=0x%016zX ", regstr[i], cpu->regbank[i]);
     }
 
-    printf("\n");
+    printf("\nITR=%016zX\n", cpu->itr);
 }
 
 int
@@ -356,14 +443,20 @@ cpu_run(struct cpu_domain *cpu)
             cpu_decode_dtype(cpu, &inst);
             cpu->regbank[REG_PC] += 4;
             break;
+        case OPCODE_LITR:
+            cpu_decode_etype(cpu, &inst);
+            cpu->regbank[REG_PC] += 2;
+            break;
         default:
             cpu->esr = ESR_UD;
             cpu_raise_int(cpu, IVEC_SYNC);
+            cpu_poll_sync(cpu);
             continue;
         }
 
         printf("[*] cycle %zd completed\n", cpu->n_cycles++);
         cpu_dump(cpu);
+        cpu_poll_sync(cpu);
     }
 }
 
