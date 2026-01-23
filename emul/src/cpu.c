@@ -345,7 +345,7 @@ cpu_raise_int(struct cpu_domain *cpu, uint8_t vector)
     }
 
     /*
-     * The processor does not need to queue up asynchronous
+     * The processor does not need to queue up synchronous
      * interrupts as they result from the current instruction.
      */
     if (vector == IVEC_SYNC) {
