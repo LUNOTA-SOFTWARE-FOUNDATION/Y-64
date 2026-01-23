@@ -19,6 +19,22 @@ typedef enum {
     TT_COMMA,       /* ',' */
     TT_NEWLINE,     /* '\n' */
     TT_MOV,         /* 'mov' */
+    TT_G0,          /* 'g0' */
+    TT_G1,          /* 'g1' */
+    TT_G2,          /* 'g2' */
+    TT_G3,          /* 'g3' */
+    TT_G4,          /* 'g4' */
+    TT_G5,          /* 'g5' */
+    TT_G6,          /* 'g6' */
+    TT_G7,          /* 'g7' */
+    TT_A0,          /* 'a0' */
+    TT_A1,          /* 'a1' */
+    TT_A2,          /* 'a2' */
+    TT_A3,          /* 'a3' */
+    TT_A4,          /* 'a4' */
+    TT_A5,          /* 'a5' */
+    TT_A6,          /* 'a6' */
+    TT_A7,          /* 'a7' */
 } tt_t;
 
 /*

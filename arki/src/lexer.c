@@ -148,6 +148,64 @@ lexer_scan_ident(struct arki_state *state, int lc, struct token *res)
 }
 
 /*
+ * Check an indentifier token against a list of  registers and
+ * override the type if it matches.
+ *
+ * @tok:   Token to check
+ *
+ * Returns zero on success
+ */
+static int
+lexer_reg(struct token *tok)
+{
+    uint8_t reg_num;
+    char *p;
+    tt_t *table_ptr = NULL;
+    tt_t areg_lookup[] = {
+        TT_A0,   TT_A1,
+        TT_A2,   TT_A3,
+        TT_A4,   TT_A5,
+        TT_A6,   TT_A7
+    };
+    tt_t greg_lookup[] = {
+        TT_G0,   TT_G1,
+        TT_G2,   TT_G3,
+        TT_G4,   TT_G5,
+        TT_G6,   TT_G7
+    };
+
+    if (tok == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (tok->type != TT_IDENT) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    p = tok->s;
+    switch (*(p++))  {
+    case 'g':
+        table_ptr = &greg_lookup[0];
+        break;
+    case 'a':
+        table_ptr = &areg_lookup[0];
+        break;
+    }
+
+    /* There are only 7 a/g regs each */
+    reg_num = atoi(p);
+    if (reg_num > 7) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    tok->type = table_ptr[reg_num];
+    return 0;
+}
+
+/*
  * Check if a token is actually a keyword and overwrite it if
  * so
  *
@@ -172,6 +230,13 @@ lexer_check_kw(struct token *tok)
     case 'm':
         if (strcmp(tok->s, "mov") == 0) {
             tok->type = TT_MOV;
+            return 0;
+        }
+
+        break;
+    case 'g':
+    case 'a':
+        if (lexer_reg(tok) == 0) {
             return 0;
         }
 
