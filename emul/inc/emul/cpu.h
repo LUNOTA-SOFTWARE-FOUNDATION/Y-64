@@ -24,6 +24,7 @@
 #define OPCODE_HLT   0x0D        /* Halt [A] */
 #define OPCODE_SRR   0x0E        /* Special register read [A] */
 #define OPCODE_SRW   0x0F        /* Special register write [A] */
+#define OPCODE_IOR   0x10        /* IMM bitwise OR [D] */
 
 /* Error syndrome types */
 #define ESR_MAV  0x01           /* Memory access violation */
