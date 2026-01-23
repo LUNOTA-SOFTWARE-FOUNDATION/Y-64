@@ -1,1 +1,1 @@
-mov g0, 1
+mov g0, 0xDEADBEEF

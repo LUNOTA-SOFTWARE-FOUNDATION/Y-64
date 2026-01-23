@@ -6,9 +6,11 @@
 #ifndef ARKI_AST_H
 #define ARKI_AST_H 1
 
+#include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
 #include "arki/state.h"
+#include "arki/reg.h"
 
 /*
  * Represents valid AST node types
@@ -16,11 +18,13 @@
  * @AST_NONE:   This node has no type
  * @AST_MOV:    This node is a 'MOV' instruction
  * @AST_NUMBER: This node is a number
+ * @AST_REG:    This node is a register
  */
 typedef enum {
     AST_NONE,
     AST_MOV,
-    AS_NUMBER
+    AST_NUMBER,
+    AST_REG,
 } ast_type_t;
 
 /*
@@ -34,6 +38,10 @@ struct ast_node {
     ast_type_t type;
     struct ast_node *left;
     struct ast_node *right;
+    union {
+        ssize_t v;
+        reg_t reg;
+    };
 };
 
 /*

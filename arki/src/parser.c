@@ -9,6 +9,7 @@
 #include "arki/token.h"
 #include "arki/lexer.h"
 #include "arki/trace.h"
+#include "arki/codegen.h"
 #include "arki/reg.h"
 
 /* Convert token type to string */
@@ -134,17 +135,32 @@ parse_expect(struct arki_state *state, struct token *tok, tt_t what)
  *
  * @state:  Assembler state
  * @tok:    Last token
+ * @res:   AST node result
  *
  * Returns zero on success
  */
 static int
-parse_mov(struct arki_state *state, struct token *tok)
+parse_mov(struct arki_state *state, struct token *tok, struct ast_node **res)
 {
+    struct ast_node *root;
+    struct ast_node *left;
+    struct ast_node *right;
+    reg_t rd, rs;
+
     if (state == NULL || tok == NULL) {
         return -1;
     }
 
+    if (res == NULL) {
+        return -1;
+    }
+
     if (tok->type != TT_MOV) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_MOV, &root) < 0) {
+        trace_error(state, "failed to allocate AST_MOV\n");
         return -1;
     }
 
@@ -154,8 +170,13 @@ parse_mov(struct arki_state *state, struct token *tok)
     }
 
     /* EXPECT <register> */
-    if (token_to_reg(tok->type) == REG_BAD) {
+    if ((rd = token_to_reg(tok->type)) == REG_BAD) {
         utok1(state, symtok("register"), tokstr(tok));
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_REG, &left) < 0) {
+        trace_error(state, "failed to allocate AST_REG\n");
         return -1;
     }
 
@@ -169,16 +190,30 @@ parse_mov(struct arki_state *state, struct token *tok)
         return -1;
     }
 
+    left->reg = rd;
+
     switch (tok->type) {
     case TT_NUMBER:
+        if (ast_alloc_node(state, AST_NUMBER, &right) < 0) {
+            trace_error(state, "failed to allocate AST_NUMBER\nn");
+            return -1;
+        }
+
+        right->v = tok->v;
         break;
     default:
         /* EXPECT <register> */
-        if (token_to_reg(tok->type) == REG_BAD) {
+        if ((rs = token_to_reg(tok->type)) == REG_BAD) {
             utok1(state, symtok("register"), tokstr(tok));
             return -1;
         }
 
+        if (ast_alloc_node(state, AST_REG, &right) < 0) {
+            trace_error(state, "failed to allocate AST_REG\n");
+            return -1;
+        }
+
+        right->reg = rs;
         break;
     }
 
@@ -187,6 +222,9 @@ parse_mov(struct arki_state *state, struct token *tok)
         return -1;
     }
 
+    root->left = left;
+    root->right = right;
+    *res = root;
     return 0;
 }
 
@@ -201,13 +239,15 @@ parse_mov(struct arki_state *state, struct token *tok)
 static int
 parse_begin(struct arki_state *state, struct token *tok)
 {
+    struct ast_node *root = NULL;
+
     if (state == NULL || tok == NULL) {
         return -1;
     }
 
     switch (tok->type) {
     case TT_MOV:
-        if (parse_mov(state, tok) < 0) {
+        if (parse_mov(state, tok, &root) < 0) {
             return -1;
         }
 
@@ -218,6 +258,11 @@ parse_begin(struct arki_state *state, struct token *tok)
     default:
         utok(state, tok);
         return -1;
+    }
+
+    if (root != NULL) {
+        if (cg_resolve_node(state, root) < 0)
+            return -1;
     }
 
     return 0;

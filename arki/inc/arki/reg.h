@@ -25,6 +25,7 @@ typedef enum {
     REG_A5,
     REG_A6,
     REG_A7,
+    REG_MAX,
     REG_BAD
 } reg_t;
 
