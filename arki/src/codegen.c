@@ -35,6 +35,8 @@ cg_emit_mov(struct arki_state *state, struct ast_node *root)
 {
     struct ast_node *lhs, *rhs;
     uint8_t opcode = OPC_SMOV;
+    size_t byte_count = 0;
+    size_t max_bytes = 2;
 
     if (state == NULL || root == NULL) {
         return -1;
@@ -57,6 +59,7 @@ cg_emit_mov(struct arki_state *state, struct ast_node *root)
     /* Should we use a wide move? */
     if (rhs->v > SHORT_IMM_MAX) {
         opcode = OPC_WMOV;
+        max_bytes = 6;
     }
 
     if (lhs->reg >= REG_MAX) {
@@ -66,9 +69,10 @@ cg_emit_mov(struct arki_state *state, struct ast_node *root)
 
     cg_emitb(state, opcode);
     cg_emitb(state, lhs->reg);
-    while (rhs->v != 0) {
+    while (rhs->v != 0 || byte_count < max_bytes) {
         cg_emitb(state, rhs->v & 0xFF);
         rhs->v >>= 8;
+        ++byte_count;
     }
     return 0;
 }
