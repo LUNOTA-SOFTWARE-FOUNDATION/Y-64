@@ -60,6 +60,7 @@ static const char *toktab[] = {
     [TT_NONE]       = symtok("none"),
     [TT_IDENT]      = symtok("ident"),
     [TT_NUMBER]     = symtok("number"),
+    [TT_COMMENT]    = symtok("comment"),
     [TT_COMMA]      = qtok(","),
     [TT_NEWLINE]    = symtok("newline"),
     [TT_MOV]        = qtok("mov"),
@@ -373,6 +374,9 @@ parse_begin(struct arki_state *state, struct token *tok)
 
         break;
     case TT_NEWLINE:
+        /* Ignored */
+        break;
+    case TT_COMMENT:
         /* Ignored */
         break;
     default:

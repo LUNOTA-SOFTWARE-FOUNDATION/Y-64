@@ -50,6 +50,27 @@ lexer_putback(struct arki_state *state, char c)
 }
 
 /*
+ * Skip an entire line until a newline
+ *
+ * @state: Assembler state
+ */
+static void
+lexer_skip_line(struct arki_state *state)
+{
+    char c;
+
+    if (state == NULL) {
+        return;
+    }
+
+    while (read(state->in_fd, &c, 1) > 0) {
+        if (c == '\n') {
+            break;
+        }
+    }
+}
+
+/*
  * Consume a single byte from the input file
  *
  * @state:   Assembler state
@@ -361,6 +382,11 @@ lexer_scan(struct arki_state *state, struct token *res)
     case '\n':
         ++state->line_num;
         res->type = TT_NEWLINE;
+        res->c = c;
+        return 0;
+    case ';':
+        lexer_skip_line(state);
+        res->type = TT_COMMENT;
         res->c = c;
         return 0;
     default:
