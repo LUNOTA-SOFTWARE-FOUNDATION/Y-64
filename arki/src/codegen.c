@@ -15,6 +15,7 @@
 /* Valid opcodes */
 #define OPC_WMOV  0x01  /* Wide IMM move */
 #define OPC_SMOV  0x03  /* Short IMM register load */
+#define OPC_HLT   0x0D  /* Halt processor */
 
 #define cg_emitb(state, byte) do {          \
         uint8_t b = (byte);                 \
@@ -77,6 +78,25 @@ cg_emit_mov(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Generate code for the 'hlt' instruction
+ *
+ * @state: Assembler state
+ * @root:  Root node to resolve
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_hlt(struct arki_state *state, struct ast_node *root)
+{
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    cg_emitb(state, OPC_HLT);
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -87,6 +107,12 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
     switch (root->type) {
     case AST_MOV:
         if (cg_emit_mov(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_HLT:
+        if (cg_emit_hlt(state, root) < 0) {
             return -1;
         }
 

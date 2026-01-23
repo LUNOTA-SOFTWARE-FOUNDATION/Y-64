@@ -230,6 +230,41 @@ parse_mov(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse a 'hlt' instruction
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_hlt(struct arki_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_HLT) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_HLT, &root) < 0) {
+        trace_error(state, "failed to allocate AST_HLT\n");
+        return -1;
+    }
+
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the last token
  *
  * @state:  Assembler state
@@ -249,6 +284,12 @@ parse_begin(struct arki_state *state, struct token *tok)
     switch (tok->type) {
     case TT_MOV:
         if (parse_mov(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_HLT:
+        if (parse_hlt(state, tok, &root) < 0) {
             return -1;
         }
 
