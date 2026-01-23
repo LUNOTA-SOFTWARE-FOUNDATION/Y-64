@@ -16,6 +16,8 @@
 #define OPC_WMOV  0x01  /* Wide IMM move */
 #define OPC_SMOV  0x03  /* Short IMM register load */
 #define OPC_HLT   0x0D  /* Halt processor */
+#define OPC_SRR   0x0E  /* Special register read */
+#define OPC_SRW   0x0F  /* Special register write */
 
 #define cg_emitb(state, byte) do {          \
         uint8_t b = (byte);                 \
@@ -97,6 +99,44 @@ cg_emit_hlt(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Generate code for the 'srr' instruction
+ *
+ * @state: Assembler state
+ * @root:  Root node to resolve
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_srr(struct arki_state *state, struct ast_node *root)
+{
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    cg_emitb(state, OPC_SRR);
+    return 0;
+}
+
+/*
+ * Generate code for the 'srr' instruction
+ *
+ * @state: Assembler state
+ * @root:  Root node to resolve
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_srw(struct arki_state *state, struct ast_node *root)
+{
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    cg_emitb(state, OPC_SRW);
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -113,6 +153,18 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
         return 0;
     case AST_HLT:
         if (cg_emit_hlt(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_SRR:
+        if (cg_emit_srr(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_SRW:
+        if (cg_emit_srw(state, root) < 0) {
             return -1;
         }
 

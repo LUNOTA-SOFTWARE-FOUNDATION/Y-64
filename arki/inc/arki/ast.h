@@ -18,6 +18,8 @@
  * @AST_NONE:   This node has no type
  * @AST_MOV:    This node is a 'MOV' instruction
  * @AST_HLT:    This node is a 'HLT' instruction
+ * @AST_SRR:    This node is a 'SRR' instruction
+ * @AST_SRW:    This node is a 'SRW' instruction
  * @AST_NUMBER: This node is a number
  * @AST_REG:    This node is a register
  */
@@ -25,6 +27,8 @@ typedef enum {
     AST_NONE,
     AST_MOV,
     AST_HLT,
+    AST_SRR,
+    AST_SRW,
     AST_NUMBER,
     AST_REG,
 } ast_type_t;
