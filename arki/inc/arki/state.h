@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <unistd.h>
 #include "arki/ptrbox.h"
 #include "arki/token.h"
 
@@ -23,6 +24,7 @@
  * @last_tok:   Last token
  * @line_num:   Current line number
  * @pass_count: Number of passes made
+ * @origin:     Program origin address
  * @putback:    Putback buffer for lexer
  */
 struct arki_state {
@@ -32,8 +34,24 @@ struct arki_state {
     struct token last_tok;
     size_t line_num;
     size_t pass_count;
+    uintptr_t origin;
     char putback;
 };
+
+/*
+ * Get the value of the current virtual program
+ * counter
+ *
+ * @state: Assembler state
+ */
+static inline uintptr_t
+arki_get_vpc(struct arki_state *state)
+{
+    size_t offset;
+
+    offset = lseek(state->out_fd, 0, SEEK_CUR);
+    return state->origin + offset;
+}
 
 /*
  * Initialize the assembler state machine
