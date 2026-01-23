@@ -8,7 +8,7 @@
 #include "arki/state.h"
 #include "arki/parser.h"
 
-#define ARKI_VERSION "0.0.1"
+#define ARKI_VERSION "0.0.2"
 
 static void
 help(void)
