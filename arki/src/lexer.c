@@ -282,6 +282,13 @@ lexer_check_kw(struct token *tok)
         }
 
         break;
+    case 'l':
+        if (strcmp(tok->s, "litr") == 0) {
+            tok->type = TT_LITR;
+            return 0;
+        }
+
+        break;
     case 'g':
     case 'a':
         if (lexer_reg(tok) == 0) {
