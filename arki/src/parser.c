@@ -425,6 +425,53 @@ parse_or(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse the 'litr' instruction
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_litr(struct arki_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root;
+    reg_t rs;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_LITR) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_LITR, &root) < 0) {
+        trace_error(state, "could not allocate AST_LITR\n");
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    if ((rs = token_to_reg(tok->type)) == REG_BAD) {
+        utok1(state, symtok("register"), tokstr(tok));
+        return -1;
+    }
+
+    root->reg = rs;
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the last token
  *
  * @state:  Assembler state
@@ -468,6 +515,12 @@ parse_begin(struct arki_state *state, struct token *tok)
         break;
     case TT_OR:
         if (parse_or(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_LITR:
+        if (parse_litr(state, tok, &root) < 0) {
             return -1;
         }
 

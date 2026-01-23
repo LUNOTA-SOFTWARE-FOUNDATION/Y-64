@@ -19,6 +19,7 @@
 #define OPC_SRR   0x0E  /* Special register read */
 #define OPC_SRW   0x0F  /* Special register write */
 #define OPC_IOR   0x10  /* IMM OR */
+#define OPC_LITR  0x14  /* Load ITR */
 
 #define cg_emitb(state, byte) do {          \
         uint8_t b = (byte);                 \
@@ -187,6 +188,34 @@ cg_emit_or(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Emit machine code for the 'litr' instruction
+ *
+ * @state; Assembler state
+ * @root:  Root node
+ */
+static int
+cg_emit_litr(struct arki_state *state, struct ast_node *root)
+{
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    if (root->type != AST_LITR) {
+        trace_error(state, "root is not litr\n");
+        return -1;
+    }
+
+    if (root->reg >= REG_MAX) {
+        trace_error(state, "bad root register for litr\n");
+        return -1;
+    }
+
+    cg_emitb(state, OPC_LITR);
+    cg_emitb(state, root->reg);
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -221,6 +250,12 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
         return 0;
     case AST_OR:
         if (cg_emit_or(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_LITR:
+        if (cg_emit_litr(state, root) < 0) {
             return -1;
         }
 
