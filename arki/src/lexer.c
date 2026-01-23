@@ -235,6 +235,13 @@ lexer_check_kw(struct token *tok)
         }
 
         break;
+    case 'h':
+        if (strcmp(tok->s, "hlt") == 0) {
+            tok->type = TT_HLT;
+            return 0;
+        }
+
+        break;
     case 'g':
     case 'a':
         if (lexer_reg(tok) == 0) {
