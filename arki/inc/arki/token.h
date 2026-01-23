@@ -39,6 +39,7 @@ typedef enum {
     TT_HLT,         /* 'hlt' */
     TT_SRR,         /* 'srr' */
     TT_SRW,         /* 'srw' */
+    TT_OR,          /* 'or' */
 } tt_t;
 
 /*
