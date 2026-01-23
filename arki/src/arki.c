@@ -44,8 +44,10 @@ assemble(const char *path)
         return -1;
     }
 
-    if (arki_parse(&state) < 0) {
-        return -1;
+    for (int i = 0; i < PASS_COUNT; ++i) {
+        if (arki_parse(&state) < 0) {
+            return -1;
+        }
     }
 
     arki_state_close(&state);

@@ -8,6 +8,8 @@
 
 #include "arki/state.h"
 
+#define PASS_COUNT 2
+
 /*
  * Begin parsing the input source file
  *

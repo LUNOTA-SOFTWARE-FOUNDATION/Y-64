@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
 #include "arki/parser.h"
 #include "arki/token.h"
 #include "arki/lexer.h"
@@ -405,5 +406,8 @@ arki_parse(struct arki_state *state)
         }
     }
 
+    ++state->pass_count;
+    state->line_num = 1;
+    lseek(state->in_fd, 0, SEEK_SET);
     return 0;
 }

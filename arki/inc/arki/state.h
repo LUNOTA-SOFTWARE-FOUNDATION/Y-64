@@ -22,6 +22,7 @@
  * @ptrbox:     Global pointer box
  * @last_tok:   Last token
  * @line_num:   Current line number
+ * @pass_count: Number of passes made
  * @putback:    Putback buffer for lexer
  */
 struct arki_state {
@@ -30,6 +31,7 @@ struct arki_state {
     struct ptrbox ptrbox;
     struct token last_tok;
     size_t line_num;
+    size_t pass_count;
     char putback;
 };
 

@@ -22,7 +22,9 @@
 #define cg_emitb(state, byte) do {          \
         uint8_t b = (byte);                 \
                                             \
-        write((state)->out_fd, &b, 1);      \
+        if ((state)->pass_count == 1) {     \
+            write((state)->out_fd, &b, 1);  \
+        }                                   \
     } while (0);
 
 /*
