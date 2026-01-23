@@ -9,7 +9,6 @@
 #include "arki/token.h"
 
 typedef enum {
-    REG_BAD,
     REG_G0,
     REG_G1,
     REG_G2,
@@ -25,7 +24,8 @@ typedef enum {
     REG_A4,
     REG_A5,
     REG_A6,
-    REG_A7
+    REG_A7,
+    REG_BAD
 } reg_t;
 
 static inline reg_t
