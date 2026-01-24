@@ -390,6 +390,42 @@ cpu_mem_write(struct cpu_domain *cpu, uintptr_t addr, const void *buf, size_t n)
 }
 
 /*
+ * A PD-side wrapper for reading memory
+ *
+ * @cpu:    Current PD
+ * @addr:   Address to read from
+ * @buf:    Buffer to read
+ * @n:      Number of bytes to read
+ */
+static ssize_t
+cpu_mem_read(struct cpu_domain *cpu, uintptr_t addr, void *buf, size_t n)
+{
+    ssize_t count;
+
+    if (cpu == NULL || buf == NULL) {
+        return -1;
+    }
+
+    if (n == 0) {
+        return -1;
+    }
+
+    count = mem_read(
+        addr,
+        buf,
+        n
+    );
+
+    if (count < 0) {
+        cpu->esr = ESR_MAV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return -1;
+    }
+
+    return count;
+}
+
+/*
  * Decode a B-type instruction
  *
  * @cpu:  Current PD
@@ -447,6 +483,42 @@ cpu_decode_btype(struct cpu_domain *cpu, inst_t *inst)
             cpu,
             cpu->regbank[rd],
             &cpu->regbank[rs],
+            8
+        );
+
+        break;
+    case OPCODE_LDB:
+        cpu_mem_read(
+            cpu,
+            cpu->regbank[rs],
+            &cpu->regbank[rd],
+            1
+        );
+
+        break;
+    case OPCODE_LDW:
+        cpu_mem_read(
+            cpu,
+            cpu->regbank[rs],
+            &cpu->regbank[rd],
+            2
+        );
+
+        break;
+    case OPCODE_LDL:
+        cpu_mem_read(
+            cpu,
+            cpu->regbank[rs],
+            &cpu->regbank[rd],
+            4
+        );
+
+        break;
+    case OPCODE_LDQ:
+        cpu_mem_read(
+            cpu,
+            cpu->regbank[rs],
+            &cpu->regbank[rd],
             8
         );
 
@@ -557,6 +629,10 @@ cpu_run(struct cpu_domain *cpu)
         case OPCODE_STW:
         case OPCODE_STL:
         case OPCODE_STQ:
+        case OPCODE_LDB:
+        case OPCODE_LDW:
+        case OPCODE_LDL:
+        case OPCODE_LDQ:
             cpu_decode_btype(cpu, &inst);
             cpu->regbank[REG_PC] += 3;
             break;
