@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include "emul/soc.h"
@@ -18,6 +19,7 @@
 #define EMUL_VERSION "0.0.1"
 
 static const char *firmware_path = NULL;
+static size_t ram_cap = DEFAULT_MEM_CAP;
 
 static void
 help(void)
@@ -28,6 +30,7 @@ help(void)
         "[-h]   Display this help menu\n"
         "[-v]   Display the version\n"
         "[-f]   Firmware ROM file\n"
+        "[-r]   Maximum RAM in GiB\n"
     );
 }
 
@@ -75,7 +78,7 @@ emul_run(void)
     size_t fw_size;
     int fw_fd;
 
-    if (soc_power_up(&soc) < 0) {
+    if (soc_power_up(&soc, ram_cap) < 0) {
         trace_error("failed to perform soc power-up\n");
         return;
     }
@@ -135,7 +138,7 @@ main(int argc, char **argv)
 {
     int opt;
 
-    while ((opt = getopt(argc, argv, "hvf:")) != -1) {
+    while ((opt = getopt(argc, argv, "hvf:r:")) != -1) {
         switch (opt) {
         case 'h':
             help();
@@ -145,6 +148,9 @@ main(int argc, char **argv)
             return -1;
         case 'f':
             firmware_path = strdup(optarg);
+            break;
+        case 'r':
+            ram_cap = atoi(optarg) * UNIT_GIB;
             break;
         }
     }

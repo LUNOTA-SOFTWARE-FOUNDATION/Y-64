@@ -19,11 +19,15 @@
  * @BUS_PEER_BAD:       Bad bus peer type
  * @BUS_PEER_FLASHROM:  BIOS flash ROM
  * @BUS_PEER_LCACHE:    Local cache unit
+ * @BUS_PEER_RAM:       External RAM
+ * @BUS_PEER_CHIPSET:   Chipset registers
  */
 typedef enum {
     BUS_PEER_BAD,
     BUS_PEER_FLASHROM,
-    BUS_PEER_LCACHE
+    BUS_PEER_LCACHE,
+    BUS_PEER_RAM,
+    BUS_PEER_CHIPSET
 } bus_peer_t;
 
 /*

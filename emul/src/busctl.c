@@ -22,6 +22,20 @@ static struct bus_peer_range memmap[] = {
         .start = 0x00100000,
         .end   = 0x00101000,
         .peer  = NULL
+    },
+
+    /* Chipset registers */
+    {
+        .start = 0x00110000,
+        .end   = 0x00111000,
+        .peer = NULL
+    },
+
+    /* Main memory */
+    {
+        .start = 0x116000,
+        .end   = -1,
+        .peer  = NULL
     }
 };
 
