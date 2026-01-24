@@ -560,6 +560,7 @@ arki_parse(struct arki_state *state)
 
     ++state->pass_count;
     state->line_num = 1;
+    state->vpc = 0;
     lseek(state->in_fd, 0, SEEK_SET);
     return 0;
 }

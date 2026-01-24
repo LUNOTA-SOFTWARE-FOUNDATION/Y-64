@@ -25,6 +25,7 @@
  * @line_num:   Current line number
  * @pass_count: Number of passes made
  * @origin:     Program origin address
+ * @vpc:        Virtual program counter
  * @putback:    Putback buffer for lexer
  */
 struct arki_state {
@@ -35,22 +36,20 @@ struct arki_state {
     size_t line_num;
     size_t pass_count;
     uintptr_t origin;
+    uintptr_t vpc;
     char putback;
 };
 
 /*
  * Get the value of the current virtual program
- * counter
+ * counter plus the origin
  *
  * @state: Assembler state
  */
 static inline uintptr_t
 arki_get_vpc(struct arki_state *state)
 {
-    size_t offset;
-
-    offset = lseek(state->out_fd, 0, SEEK_CUR);
-    return state->origin + offset;
+    return state->origin + state->vpc;
 }
 
 /*

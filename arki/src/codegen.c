@@ -27,6 +27,8 @@
         if ((state)->pass_count == 1) {     \
             write((state)->out_fd, &b, 1);  \
         }                                   \
+                                            \
+        ++(state)->vpc;                     \
     } while (0);
 
 /*
