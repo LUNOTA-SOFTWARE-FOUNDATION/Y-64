@@ -107,6 +107,7 @@ chipset_write(struct bus_peer *peer, uintptr_t addr, const void *buf, size_t n)
 {
     struct soc_desc *soc;
     struct chipset_regs *cs_regs;
+    uint8_t memctl;
 
     if (peer == NULL || buf == NULL) {
         errno = -EINVAL;
@@ -124,7 +125,19 @@ chipset_write(struct bus_peer *peer, uintptr_t addr, const void *buf, size_t n)
     }
 
     cs_regs = &soc->cs_regs;
+    memctl = cs_regs->memctl;
     memcpy(cs_regs, buf, n);
+
+    /*
+     * If the new memctl value does not have the CG bit set,
+     * ensure that we are not unsetting it. This bit should
+     * be considered sticky and thus unidirectional.
+     */
+    if (!ISSET(cs_regs->memctl, CS_MEMCTL_CG)) {
+        if (ISSET(memctl, CS_MEMCTL_CG))
+            cs_regs->memctl |= CS_MEMCTL_CG;
+    }
+
     return n;
 }
 
