@@ -25,6 +25,8 @@ typedef enum {
     REG_A5,
     REG_A6,
     REG_A7,
+    REG_TT,
+    REG_SP,
     REG_MAX,
     REG_BAD
 } reg_t;
@@ -49,6 +51,7 @@ token_to_reg(tt_t token)
     case TT_A5:     return REG_A5;
     case TT_A6:     return REG_A6;
     case TT_A7:     return REG_A7;
+    case TT_SP:     return REG_SP;
     default:
         return REG_BAD;
     }

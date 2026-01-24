@@ -37,6 +37,7 @@ typedef enum {
     TT_A5,          /* 'a5' */
     TT_A6,          /* 'a6' */
     TT_A7,          /* 'a7' */
+    TT_SP,          /* 'sp' */
     TT_HLT,         /* 'hlt' */
     TT_SRR,         /* 'srr' */
     TT_SRW,         /* 'srw' */
