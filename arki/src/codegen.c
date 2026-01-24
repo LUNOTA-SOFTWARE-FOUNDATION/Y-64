@@ -24,6 +24,10 @@
 #define OPC_STW   0x16  /* Store word */
 #define OPC_STL   0x17  /* Store dword */
 #define OPC_STQ   0x18  /* Store qword */
+#define OPC_LDB   0x19  /* Load byte */
+#define OPC_LDW   0x1A  /* Load word */
+#define OPC_LDL   0x1B  /* Load dword */
+#define OPC_LDQ   0x1C  /* Load qword */
 
 #define cg_emitb(state, byte) do {          \
         uint8_t b = (byte);                 \
@@ -281,6 +285,65 @@ cg_emit_store(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Emit machine code for a load variant instruction
+ *
+ * @state; Assembler state
+ * @root:  Root node
+ */
+static int
+cg_emit_load(struct arki_state *state, struct ast_node *root)
+{
+    struct ast_node *lhs, *rhs;
+    uint8_t opcode;
+
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    switch (root->type) {
+    case AST_LDB:
+        opcode = OPC_LDB;
+        break;
+    case AST_LDW:
+        opcode = OPC_LDW;
+        break;
+    case AST_LDL:
+        opcode = OPC_LDL;
+        break;
+    case AST_LDQ:
+        opcode = OPC_LDQ;
+        break;
+    default:
+        return -1;
+    }
+
+    if ((lhs = root->left) == NULL) {
+        trace_error(state, "load has no lhs\n");
+        return -1;
+    }
+
+    if ((rhs = root->right) == NULL) {
+        trace_error(state, "load has no rhs\n");
+        return -1;
+    }
+
+    if (lhs->type != AST_REG) {
+        trace_error(state, "load lhs is not a register\n");
+        return -1;
+    }
+
+    if (rhs->type != AST_REG) {
+        trace_error(state, "load rhs is not a register\n");
+        return -1;
+    }
+
+    cg_emitb(state, opcode);
+    cg_emitb(state, lhs->reg);
+    cg_emitb(state, rhs->reg);
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -330,6 +393,15 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
     case AST_STL:
     case AST_STQ:
         if (cg_emit_store(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_LDB:
+    case AST_LDW:
+    case AST_LDL:
+    case AST_LDQ:
+        if (cg_emit_load(state, root) < 0) {
             return -1;
         }
 

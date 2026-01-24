@@ -22,6 +22,14 @@
  * @AST_SRW:    This node is a 'SRW' instruction
  * @AST_OR:     This node is a 'OR' instruction
  * @AST_LITR:   This node is a 'LITR' instruction
+ * @AST_STB:    This node is a 'STB' instruction
+ * @AST_STW:    This node is a 'STW' instruction
+ * @AST_STL:    This node is a 'STL' instruction
+ * @AST_STQ:    This node is a 'STQ' instruction
+ * @AST_LDB:    This node is a 'LDB' instruction
+ * @AST_LDW:    This node is a 'LDW' instruction
+ * @AST_LDL:    This node is a 'LDL' instruction
+ * @AST_LDQ:    This node is a 'LDQ' instruction
  * @AST_NUMBER: This node is a number
  * @AST_REG:    This node is a register
  */
@@ -37,6 +45,10 @@ typedef enum {
     AST_STW,
     AST_STL,
     AST_STQ,
+    AST_LDB,
+    AST_LDW,
+    AST_LDL,
+    AST_LDQ,
     AST_NUMBER,
     AST_REG,
 } ast_type_t;

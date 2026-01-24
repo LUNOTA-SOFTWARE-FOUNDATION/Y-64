@@ -599,6 +599,85 @@ parse_store(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse the load variant instruction
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_load(struct arki_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *lhs, *root, *rhs;
+    reg_t rd, rs;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    switch (tok->type) {
+    case TT_LDB:
+        if (ast_alloc_node(state, AST_LDB, &root) < 0) {
+            trace_error(state, "failed to allocate AST_LDB\n");
+            return -1;
+        }
+
+        break;
+    default:
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    if ((rs = token_to_reg(tok->type)) == REG_BAD) {
+        utok1(state, symtok("register"), tokstr(tok));
+        return -1;
+    }
+
+    /* EXPECT ',' */
+    if (parse_expect(state, tok, TT_COMMA) < 0) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    if ((rd = token_to_reg(tok->type)) == REG_BAD) {
+        utok1(state, symtok("register"), tokstr(tok));
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_REG, &lhs) < 0) {
+        trace_error(state, "failed to allocate AST_REG\n");
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_REG, &rhs) < 0) {
+        trace_error(state, "failed to allocate AST_REG\n");
+        return -1;
+    }
+
+    lhs->reg = rs;
+    rhs->reg = rd;
+
+    root->left = lhs;
+    root->right = rhs;
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the last token
  *
  * @state:  Assembler state
@@ -657,6 +736,15 @@ parse_begin(struct arki_state *state, struct token *tok)
     case TT_STL:
     case TT_STQ:
         if (parse_store(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_LDB:
+    case TT_LDW:
+    case TT_LDL:
+    case TT_LDQ:
+        if (parse_load(state, tok, &root) < 0) {
             return -1;
         }
 
