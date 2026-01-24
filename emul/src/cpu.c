@@ -40,6 +40,16 @@ static const char *regstr[] = {
 };
 
 /*
+ * A table used to lookup masks of valid bits within
+ * a special register
+ */
+#define sreg_index(id) ((id) - 1)
+static uint64_t sreg_masktab[] = {
+    [sreg_index(SREG_INTCONF)] = 0x1FF
+};
+#undef sreg_index
+
+/*
  * Read a special register
  *
  * @cpu: PD of special register to read
@@ -79,6 +89,12 @@ cpu_sreg_write(struct cpu_domain *cpu, sreg_t reg, uint64_t v)
     }
 
     if (reg == SREG_BAD || reg >= SREG_MAX) {
+        cpu->esr = ESR_PV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    if ((v & ~sreg_masktab[reg - 1]) != 0) {
         cpu->esr = ESR_PV;
         cpu_raise_int(cpu, IVEC_SYNC);
         return;
