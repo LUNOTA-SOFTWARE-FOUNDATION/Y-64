@@ -47,6 +47,10 @@ typedef enum {
     TT_STW,         /* 'stw' */
     TT_STL,         /* 'stl' */
     TT_STQ,         /* 'stq' */
+    TT_LDB,         /* 'ldb' */
+    TT_LDW,         /* 'ldw' */
+    TT_LDL,         /* 'ldl' */
+    TT_LDQ,         /* 'ldq' */
 } tt_t;
 
 /*

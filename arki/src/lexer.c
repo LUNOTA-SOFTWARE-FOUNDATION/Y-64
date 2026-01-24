@@ -313,6 +313,26 @@ lexer_check_kw(struct token *tok)
             return 0;
         }
 
+        if (strcmp(tok->s, "ldb") == 0) {
+            tok->type = TT_LDB;
+            return 0;
+        }
+
+        if (strcmp(tok->s, "ldw") == 0) {
+            tok->type = TT_LDW;
+            return 0;
+        }
+
+        if (strcmp(tok->s, "ldl") == 0) {
+            tok->type = TT_LDL;
+            return 0;
+        }
+
+        if (strcmp(tok->s, "ldq") == 0) {
+            tok->type = TT_LDQ;
+            return 0;
+        }
+
         break;
     case 'g':
     case 'a':
