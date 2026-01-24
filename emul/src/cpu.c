@@ -488,6 +488,7 @@ cpu_decode_btype(struct cpu_domain *cpu, inst_t *inst)
 
         break;
     case OPCODE_LDB:
+        cpu->regbank[rd] = 0;
         cpu_mem_read(
             cpu,
             cpu->regbank[rs],
@@ -497,6 +498,7 @@ cpu_decode_btype(struct cpu_domain *cpu, inst_t *inst)
 
         break;
     case OPCODE_LDW:
+        cpu->regbank[rd] = 0;
         cpu_mem_read(
             cpu,
             cpu->regbank[rs],
@@ -506,6 +508,7 @@ cpu_decode_btype(struct cpu_domain *cpu, inst_t *inst)
 
         break;
     case OPCODE_LDL:
+        cpu->regbank[rd] = 0;
         cpu_mem_read(
             cpu,
             cpu->regbank[rs],
@@ -515,6 +518,7 @@ cpu_decode_btype(struct cpu_domain *cpu, inst_t *inst)
 
         break;
     case OPCODE_LDQ:
+        cpu->regbank[rd] = 0;
         cpu_mem_read(
             cpu,
             cpu->regbank[rs],
