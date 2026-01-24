@@ -78,7 +78,7 @@ cpu_sreg_write(struct cpu_domain *cpu, sreg_t reg, uint64_t v)
         return;
     }
 
-    if (reg == SREG_BAD) {
+    if (reg == SREG_BAD || reg >= SREG_MAX) {
         cpu->esr = ESR_PV;
         cpu_raise_int(cpu, IVEC_SYNC);
         return;
