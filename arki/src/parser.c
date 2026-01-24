@@ -629,6 +629,27 @@ parse_load(struct arki_state *state, struct token *tok, struct ast_node **res)
         }
 
         break;
+    case TT_LDW:
+        if (ast_alloc_node(state, AST_LDW, &root) < 0) {
+            trace_error(state, "failed to allocate AST_LDW\n");
+            return -1;
+        }
+
+        break;
+    case TT_LDL:
+        if (ast_alloc_node(state, AST_LDL, &root) < 0) {
+            trace_error(state, "failed to allocate AST_LDL\n");
+            return -1;
+        }
+
+        break;
+    case TT_LDQ:
+        if (ast_alloc_node(state, AST_LDQ, &root) < 0) {
+            trace_error(state, "failed to allocate AST_LDQ\n");
+            return -1;
+        }
+
+        break;
     default:
         return -1;
     }
