@@ -63,6 +63,7 @@ static const char *toktab[] = {
     [TT_NUMBER]     = symtok("number"),
     [TT_COMMENT]    = symtok("comment"),
     [TT_COMMA]      = qtok(","),
+    [TT_COLON]      = qtok(":"),
     [TT_NEWLINE]    = symtok("newline"),
     [TT_MOV]        = qtok("mov"),
     [TT_G0]         = qtok("g0"),

@@ -18,6 +18,7 @@ typedef enum {
     TT_NUMBER,      /* <NUMBER> */
     TT_COMMENT,     /* <COMMENT> */
     TT_COMMA,       /* ',' */
+    TT_COLON,       /* ':' */
     TT_NEWLINE,     /* '\n' */
     TT_MOV,         /* 'mov' */
     TT_G0,          /* 'g0' */
