@@ -148,6 +148,40 @@ parse_expect(struct arki_state *state, struct token *tok, tt_t what)
 }
 
 /*
+ * Acquire a symbol by name
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    Symbol result
+ *
+ * XXX: Symbol might be NULL on first pass!
+ *
+ * Returns zero on success
+ */
+static int
+parse_get_sym(struct arki_state *state, const char *name, struct symbol **res)
+{
+    struct symbol *sym;
+
+    if (state == NULL || name == NULL) {
+        return -1;
+    }
+
+    if (name == NULL) {
+        return -1;
+    }
+
+    sym = symbol_by_name(&state->symtab, name);
+    if (sym == NULL && state->pass_count > 0) {
+        trace_error(state, "undefined reference to '%s'\n", name);
+        return -1;
+    }
+
+    *res = sym;
+    return 0;
+}
+
+/*
  * Parse source operand
  *
  * @state:  Assembler state
@@ -160,6 +194,7 @@ static int
 parse_source(struct arki_state *state, struct token *tok, struct ast_node **res)
 {
     struct ast_node *rhs;
+    struct symbol *sym;
     reg_t rs;
 
     if (state == NULL || tok == NULL) {
@@ -178,6 +213,26 @@ parse_source(struct arki_state *state, struct token *tok, struct ast_node **res)
         }
 
         rhs->v = tok->v;
+        break;
+    case TT_IDENT:
+        if (parse_get_sym(state, tok->s, &sym) < 0) {
+            return -1;
+        }
+
+        /* Handle first pass case */
+        if (sym != NULL) {
+            if (sym->type != SYMBOL_LABEL) {
+                trace_error(state, "'%s' is not a label\n", tok->s);
+                return -1;
+            }
+        }
+
+        if (ast_alloc_node(state, AST_LABEL, &rhs) < 0) {
+            trace_error(state, "failed to allocate AST_LABEL\n");
+            return -1;
+        }
+
+        rhs->symbol = sym;
         break;
     default:
         /* EXPECT <register> */
@@ -500,6 +555,9 @@ parse_litr(struct arki_state *state, struct token *tok, struct ast_node **res)
 static int
 parse_ident(struct arki_state *state, struct token *tok)
 {
+    struct symbol *sym;
+    int error;
+
     if (state == NULL || tok == NULL) {
         return -1;
     }
@@ -509,7 +567,19 @@ parse_ident(struct arki_state *state, struct token *tok)
     }
 
     if (state->pass_count == 0) {
-        printf("label '%s' @ %016zX\n", tok->s, arki_get_vpc(state));
+        error = symbol_table_new(
+            &state->symtab,
+            tok->s,
+            SYMBOL_LABEL,
+            &sym
+        );
+
+        if (error < 0) {
+            trace_error(state, "failed to allocate symbol\n");
+            return -1;
+        }
+
+        sym->vpc = arki_get_vpc(state);
     }
 
     if (parse_expect(state, tok, TT_COLON) < 0) {

@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stddef.h>
+#include "arki/symbol.h"
 #include "arki/state.h"
 #include "arki/reg.h"
 
@@ -32,6 +33,7 @@
  * @AST_LDQ:    This node is a 'LDQ' instruction
  * @AST_NUMBER: This node is a number
  * @AST_REG:    This node is a register
+ * @AST_LABEL:  This node is a register
  */
 typedef enum {
     AST_NONE,
@@ -51,6 +53,7 @@ typedef enum {
     AST_LDQ,
     AST_NUMBER,
     AST_REG,
+    AST_LABEL,
 } ast_type_t;
 
 /*
@@ -59,11 +62,13 @@ typedef enum {
  * @type:   Node type
  * @left:   Left-hand leaf
  * @right:  Right-hand leaf
+ * @symbol: Symbol associated with node
  */
 struct ast_node {
     ast_type_t type;
     struct ast_node *left;
     struct ast_node *right;
+    struct symbol *symbol;
     union {
         ssize_t v;
         reg_t reg;

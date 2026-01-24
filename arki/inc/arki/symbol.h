@@ -28,12 +28,14 @@ typedef enum {
  * @name: Name of symbol
  * @type: Symbol type
  * @id:   Symbol ID
+ * @vpc:  Virtual program counter value for symbol
  * @link: Queue link
  */
 struct symbol {
     char *name;
     sym_type_t type;
     symid_t id;
+    uintptr_t vpc;
     TAILQ_ENTRY(symbol) link;
 };
 

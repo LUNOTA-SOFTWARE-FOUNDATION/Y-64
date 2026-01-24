@@ -50,10 +50,12 @@
 static int
 cg_emit_mov(struct arki_state *state, struct ast_node *root)
 {
+    struct symbol *symbol;
     struct ast_node *lhs, *rhs;
     uint8_t opcode = OPC_SMOV;
     size_t byte_count = 0;
     size_t max_bytes = 2;
+    uintptr_t imm = 0;
 
     if (state == NULL || root == NULL) {
         return -1;
@@ -68,13 +70,25 @@ cg_emit_mov(struct arki_state *state, struct ast_node *root)
     }
 
     /* TODO: Support register moves */
-    if (rhs->type != AST_NUMBER) {
-        trace_error(state, "rhs of mov is not an imm\n");
+    switch (rhs->type) {
+    case AST_NUMBER:
+        imm = rhs->v;
+        break;
+    case AST_LABEL:
+        if ((symbol = rhs->symbol) == NULL && state->pass_count > 0) {
+            trace_error(state, "mov rhs hsa no symbol\n");
+            return -1;
+        }
+
+        imm = (symbol != NULL) ? symbol->vpc : 0xFFFFFFFFFFFF;
+        break;
+    default:
+        trace_error(state, "unexpectd rhs type %d for mov\n", rhs->type);
         return -1;
     }
 
     /* Should we use a wide move? */
-    if (rhs->v > SHORT_IMM_MAX) {
+    if (imm > SHORT_IMM_MAX) {
         opcode = OPC_WMOV;
         max_bytes = 6;
     }
@@ -86,9 +100,9 @@ cg_emit_mov(struct arki_state *state, struct ast_node *root)
 
     cg_emitb(state, opcode);
     cg_emitb(state, lhs->reg);
-    while (rhs->v != 0 || byte_count < max_bytes) {
-        cg_emitb(state, rhs->v & 0xFF);
-        rhs->v >>= 8;
+    while (imm != 0 || byte_count < max_bytes) {
+        cg_emitb(state, imm & 0xFF);
+        imm >>= 8;
         ++byte_count;
     }
     return 0;
