@@ -33,6 +33,10 @@ typedef enum {
     AST_SRW,
     AST_OR,
     AST_LITR,
+    AST_STB,
+    AST_STW,
+    AST_STL,
+    AST_STQ,
     AST_NUMBER,
     AST_REG,
 } ast_type_t;

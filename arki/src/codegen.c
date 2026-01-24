@@ -20,6 +20,10 @@
 #define OPC_SRW   0x0F  /* Special register write */
 #define OPC_IOR   0x10  /* IMM OR */
 #define OPC_LITR  0x14  /* Load ITR */
+#define OPC_STB   0x15  /* Store byte */
+#define OPC_STW   0x16  /* Store word */
+#define OPC_STL   0x17  /* Store dword */
+#define OPC_STQ   0x18  /* Store qword */
 
 #define cg_emitb(state, byte) do {          \
         uint8_t b = (byte);                 \
@@ -218,6 +222,65 @@ cg_emit_litr(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Emit machine code for a store variant instruction
+ *
+ * @state; Assembler state
+ * @root:  Root node
+ */
+static int
+cg_emit_store(struct arki_state *state, struct ast_node *root)
+{
+    struct ast_node *lhs, *rhs;
+    uint8_t opcode;
+
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    switch (root->type) {
+    case AST_STB:
+        opcode = OPC_STB;
+        break;
+    case AST_STW:
+        opcode = OPC_STW;
+        break;
+    case AST_STL:
+        opcode = OPC_STL;
+        break;
+    case AST_STQ:
+        opcode = OPC_STQ;
+        break;
+    default:
+        return -1;
+    }
+
+    if ((lhs = root->left) == NULL) {
+        trace_error(state, "store has no lhs\n");
+        return -1;
+    }
+
+    if ((rhs = root->right) == NULL) {
+        trace_error(state, "store has no rhs\n");
+        return -1;
+    }
+
+    if (lhs->type != AST_REG) {
+        trace_error(state, "store lhs is not a register\n");
+        return -1;
+    }
+
+    if (rhs->type != AST_REG) {
+        trace_error(state, "store rhs is not a register\n");
+        return -1;
+    }
+
+    cg_emitb(state, opcode);
+    cg_emitb(state, lhs->reg);
+    cg_emitb(state, rhs->reg);
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -258,6 +321,15 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
         return 0;
     case AST_LITR:
         if (cg_emit_litr(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_STB:
+    case AST_STW:
+    case AST_STL:
+    case AST_STQ:
+        if (cg_emit_store(state, root) < 0) {
             return -1;
         }
 
