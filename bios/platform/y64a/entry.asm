@@ -26,6 +26,4 @@ _start:
     ;; TODO: The interrupt service table needs to be placed at the bottom
     ;;       of the processor local cache
     ;;
-halt:
     hlt
-    b halt
