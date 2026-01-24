@@ -29,9 +29,16 @@ arki_state_init(struct arki_state *state, const char *path)
         return -1;
     }
 
+    if (symbol_table_init(&state->symtab) < 0) {
+        close(state->in_fd);
+        close(state->out_fd);
+        return -1;
+    }
+
     if (ptrbox_init(&state->ptrbox) < 0) {
         close(state->in_fd);
         close(state->out_fd);
+        symbol_table_destroy(&state->symtab);
         return -1;
     }
 
@@ -49,4 +56,5 @@ arki_state_close(struct arki_state *state)
     close(state->in_fd);
     close(state->out_fd);
     ptrbox_destroy(&state->ptrbox);
+    symbol_table_destroy(&state->symtab);
 }

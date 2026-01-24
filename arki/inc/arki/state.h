@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include "arki/ptrbox.h"
 #include "arki/token.h"
+#include "arki/symbol.h"
 
 /* Default output filename */
 #define DEFAULT_OUT "y64.bin"
@@ -20,6 +21,7 @@
  *
  * @in_fd:      Input file descriptor
  * @out_fd:     Output file descriptor
+ * @symtab:     Global symbol table
  * @ptrbox:     Global pointer box
  * @last_tok:   Last token
  * @line_num:   Current line number
@@ -31,6 +33,7 @@
 struct arki_state {
     int in_fd;
     int out_fd;
+    struct symbol_table symtab;
     struct ptrbox ptrbox;
     struct token last_tok;
     size_t line_num;
