@@ -87,7 +87,11 @@ static const char *toktab[] = {
     [TT_SRR]        = qtok("srr"),
     [TT_SRW]        = qtok("srw"),
     [TT_OR]         = qtok("or"),
-    [TT_LITR]       = qtok("litr")
+    [TT_LITR]       = qtok("litr"),
+    [TT_STB]        = qtok("stb"),
+    [TT_STW]        = qtok("stw"),
+    [TT_STL]        = qtok("stl"),
+    [TT_STQ]        = qtok("stq")
 };
 
 /*

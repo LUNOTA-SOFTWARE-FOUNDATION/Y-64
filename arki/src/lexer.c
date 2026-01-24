@@ -279,6 +279,26 @@ lexer_check_kw(struct token *tok)
             return 0;
         }
 
+        if (strcmp(tok->s, "stb") == 0) {
+            tok->type = TT_STB;
+            return 0;
+        }
+
+        if (strcmp(tok->s, "stw") == 0) {
+            tok->type = TT_STW;
+            return 0;
+        }
+
+        if (strcmp(tok->s, "stl") == 0) {
+            tok->type = TT_STL;
+            return 0;
+        }
+
+        if (strcmp(tok->s, "stq") == 0) {
+            tok->type = TT_STQ;
+            return 0;
+        }
+
         break;
     case 'o':
         if (strcmp(tok->s, "or") == 0) {
