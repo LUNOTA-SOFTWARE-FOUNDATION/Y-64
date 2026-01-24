@@ -28,7 +28,11 @@
 #define OPCODE_SRR   0x0E        /* Special register read [A] */
 #define OPCODE_SRW   0x0F        /* Special register write [A] */
 #define OPCODE_IOR   0x10        /* IMM bitwise OR [D] */
-#define OPCODE_LITR  0x14        /* Load ITR */
+#define OPCODE_LITR  0x14        /* Load ITR [E] */
+#define OPCODE_STB   0x15        /* Store byte [B] */
+#define OPCODE_STW   0x16        /* Store word [B] */
+#define OPCODE_STL   0x17        /* Store dword [B] */
+#define OPCODE_STQ   0x18        /* Store qword [B] */
 
 /* Error syndrome types */
 #define ESR_MAV  0x01           /* Memory access violation */

@@ -353,6 +353,108 @@ cpu_poll_sync(struct cpu_domain *cpu)
     }
 }
 
+/*
+ * A PD-side wrapper for writing memory
+ *
+ * @cpu:    Current PD
+ * @addr:   Address to write to
+ * @buf:    Buffer to write
+ * @n:      Number of bytes to write
+ */
+static ssize_t
+cpu_mem_write(struct cpu_domain *cpu, uintptr_t addr, const void *buf, size_t n)
+{
+    ssize_t count;
+
+    if (cpu == NULL || buf == NULL) {
+        return -1;
+    }
+
+    if (n == 0) {
+        return -1;
+    }
+
+    count = mem_write(
+        addr,
+        buf,
+        n
+    );
+
+    if (count < 0) {
+        cpu->esr = ESR_MAV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        printf("MAV @ %p\n", addr);
+        return -1;
+    }
+
+    return count;
+}
+
+/*
+ * Decode a B-type instruction
+ *
+ * @cpu:  Current PD
+ * @inst: Instruction to decode
+ */
+static void
+cpu_decode_btype(struct cpu_domain *cpu, inst_t *inst)
+{
+    reg_t rd, rs;
+
+    if (cpu == NULL || inst == NULL) {
+        return;
+    }
+
+    /* Extract destination and source regs */
+    rd = (inst->raw >> 8) & 0xFF;
+    rs = (inst->raw >> 16) & 0xFF;
+
+    if (rd >= REG_MAX || rs >= REG_MAX) {
+        cpu->esr = ESR_PV;
+        cpu_raise_int(cpu, IVEC_SYNC);
+        return;
+    }
+
+    switch (inst->opcode) {
+    case OPCODE_STB:
+        cpu_mem_write(
+            cpu,
+            cpu->regbank[rd],
+            &cpu->regbank[rs],
+            1
+        );
+
+        break;
+    case OPCODE_STW:
+        cpu_mem_write(
+            cpu,
+            cpu->regbank[rd],
+            &cpu->regbank[rs],
+            2
+        );
+
+        break;
+    case OPCODE_STL:
+        cpu_mem_write(
+            cpu,
+            cpu->regbank[rd],
+            &cpu->regbank[rs],
+            4
+        );
+
+        break;
+    case OPCODE_STQ:
+        cpu_mem_write(
+            cpu,
+            cpu->regbank[rd],
+            &cpu->regbank[rs],
+            8
+        );
+
+        break;
+    }
+}
+
 void
 cpu_raise_int(struct cpu_domain *cpu, uint8_t vector)
 {
@@ -451,6 +553,13 @@ cpu_run(struct cpu_domain *cpu)
         case OPCODE_IMOV:
             cpu_decode_ctype(cpu, &inst);
             cpu->regbank[REG_PC] += 8;
+            break;
+        case OPCODE_STB:
+        case OPCODE_STW:
+        case OPCODE_STL:
+        case OPCODE_STQ:
+            cpu_decode_btype(cpu, &inst);
+            cpu->regbank[REG_PC] += 3;
             break;
         case OPCODE_IADD:
         case OPCODE_IMOVS:
