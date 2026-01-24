@@ -383,7 +383,6 @@ cpu_mem_write(struct cpu_domain *cpu, uintptr_t addr, const void *buf, size_t n)
     if (count < 0) {
         cpu->esr = ESR_MAV;
         cpu_raise_int(cpu, IVEC_SYNC);
-        printf("MAV @ %p\n", addr);
         return -1;
     }
 
