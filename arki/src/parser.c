@@ -140,6 +140,58 @@ parse_expect(struct arki_state *state, struct token *tok, tt_t what)
 }
 
 /*
+ * Parse source operand
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_source(struct arki_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *rhs;
+    reg_t rs;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    switch (tok->type) {
+    case TT_NUMBER:
+        if (ast_alloc_node(state, AST_NUMBER, &rhs) < 0) {
+            trace_error(state, "failed to allocate AST_NUMBER\nn");
+            return -1;
+        }
+
+        rhs->v = tok->v;
+        break;
+    default:
+        /* EXPECT <register> */
+        if ((rs = token_to_reg(tok->type)) == REG_BAD) {
+            utok1(state, symtok("register"), tokstr(tok));
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_REG, &rhs) < 0) {
+            trace_error(state, "failed to allocate AST_REG\n");
+            return -1;
+        }
+
+        rhs->reg = rs;
+        break;
+    }
+
+    *res = rhs;
+    return 0;
+}
+
+/*
  * Parse a 'mov' instruction
  *
  * @state:  Assembler state
@@ -154,7 +206,7 @@ parse_mov(struct arki_state *state, struct token *tok, struct ast_node **res)
     struct ast_node *root;
     struct ast_node *left;
     struct ast_node *right;
-    reg_t rd, rs;
+    reg_t rd;
 
     if (state == NULL || tok == NULL) {
         return -1;
@@ -200,29 +252,8 @@ parse_mov(struct arki_state *state, struct token *tok, struct ast_node **res)
     }
 
     left->reg = rd;
-    switch (tok->type) {
-    case TT_NUMBER:
-        if (ast_alloc_node(state, AST_NUMBER, &right) < 0) {
-            trace_error(state, "failed to allocate AST_NUMBER\nn");
-            return -1;
-        }
-
-        right->v = tok->v;
-        break;
-    default:
-        /* EXPECT <register> */
-        if ((rs = token_to_reg(tok->type)) == REG_BAD) {
-            utok1(state, symtok("register"), tokstr(tok));
-            return -1;
-        }
-
-        if (ast_alloc_node(state, AST_REG, &right) < 0) {
-            trace_error(state, "failed to allocate AST_REG\n");
-            return -1;
-        }
-
-        right->reg = rs;
-        break;
+    if (parse_source(state, tok, &right) < 0) {
+        return -1;
     }
 
     root->left = left;
@@ -349,7 +380,7 @@ static int
 parse_or(struct arki_state *state, struct token *tok, struct ast_node **res)
 {
     struct ast_node *left, *root, *right;
-    reg_t rd, rs;
+    reg_t rd;
 
     if (state == NULL || tok == NULL) {
         return -1;
@@ -395,29 +426,8 @@ parse_or(struct arki_state *state, struct token *tok, struct ast_node **res)
     }
 
     left->reg = rd;
-    switch (tok->type) {
-    case TT_NUMBER:
-        if (ast_alloc_node(state, AST_NUMBER, &right) < 0) {
-            trace_error(state, "failed to allocate AST_NUMBER\nn");
-            return -1;
-        }
-
-        right->v = tok->v;
-        break;
-    default:
-        /* EXPECT <register> */
-        if ((rs = token_to_reg(tok->type)) == REG_BAD) {
-            utok1(state, symtok("register"), tokstr(tok));
-            return -1;
-        }
-
-        if (ast_alloc_node(state, AST_REG, &right) < 0) {
-            trace_error(state, "failed to allocate AST_REG\n");
-            return -1;
-        }
-
-        right->reg = rs;
-        break;
+    if (parse_source(state, tok, &right) < 0) {
+        return -1;
     }
 
     root->left = left;
