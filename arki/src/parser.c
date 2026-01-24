@@ -550,6 +550,27 @@ parse_store(struct arki_state *state, struct token *tok, struct ast_node **res)
         }
 
         break;
+    case TT_STW:
+        if (ast_alloc_node(state, AST_STW, &root) < 0) {
+            trace_error(state, "failed to allocate AST_STW\n");
+            return -1;
+        }
+
+        break;
+    case TT_STL:
+        if (ast_alloc_node(state, AST_STL, &root) < 0) {
+            trace_error(state, "failed to allocate AST_STL\n");
+            return -1;
+        }
+
+        break;
+    case TT_STQ:
+        if (ast_alloc_node(state, AST_STQ, &root) < 0) {
+            trace_error(state, "failed to allocate AST_STQ\n");
+            return -1;
+        }
+
+        break;
     default:
         return -1;
     }
