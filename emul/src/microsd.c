@@ -35,7 +35,7 @@ microsd_is_inserted(void)
 static void
 microsd_write_block(struct spi_block *block, off_t offset)
 {
-    printf("block @ off<%016zX>\n", offset);
+    balloon_write(&sd_data, offset, block->shift_reg, block->length);
     for (uint8_t i = 0; i < block->length; ++i) {
         if (i > 0 && i % 4 == 0) {
             printf("\n");
