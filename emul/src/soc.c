@@ -151,6 +151,7 @@ chipset_write(struct bus_peer *peer, uintptr_t addr, const void *buf, size_t n)
     struct chipset_regs *cs_regs;
     struct spi_ctl spi_ctl;
     uint8_t memctl;
+    char *dest;
     int error = 0;
 
     if (peer == NULL || buf == NULL) {
@@ -171,7 +172,12 @@ chipset_write(struct bus_peer *peer, uintptr_t addr, const void *buf, size_t n)
     cs_regs = &soc->cs_regs;
     memctl = cs_regs->memctl;
     spi_ctl = cs_regs->spi_ctl;
-    memcpy(cs_regs, buf, n);
+    dest = (char *)cs_regs;
+    memcpy(
+        &dest[bus_peer_mmio(CHIPSET_REGS_START, addr)],
+        buf,
+        n
+    );
 
     /*
      * If the new memctl value does not have the CG bit set,
