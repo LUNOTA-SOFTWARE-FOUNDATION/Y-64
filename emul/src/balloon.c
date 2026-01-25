@@ -110,4 +110,5 @@ balloon_destroy(struct balloon_mem *balloon)
     }
 
     free(balloon->buf);
+    balloon->buf = NULL;
 }
