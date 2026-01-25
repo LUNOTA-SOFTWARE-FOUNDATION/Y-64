@@ -14,10 +14,12 @@
 #include "emul/balloon.h"
 #include "emul/memctl.h"
 #include "emul/flashrom.h"
+#include "emul/microsd.h"
 
 #define FLASHROM_DUMP_LEN 128
 #define EMUL_VERSION "0.0.1"
 
+static const char *sd_path = NULL;
 static const char *firmware_path = NULL;
 static size_t ram_cap = DEFAULT_MEM_CAP;
 
@@ -31,6 +33,7 @@ help(void)
         "[-v]   Display the version\n"
         "[-f]   Firmware ROM file\n"
         "[-r]   Maximum RAM in GiB\n"
+        "[-s]   Insert microsd media\n"
     );
 }
 
@@ -123,6 +126,11 @@ emul_run(void)
         goto done;
     }
 
+    /* Insert microsd media if we can */
+    if (sd_path != NULL) {
+        microsd_insert(sd_path);
+    }
+
     flashrom_dump();
     printf("[*] dumping bootstrap pd state\n");
     cpu_dump(cpu);
@@ -138,7 +146,7 @@ main(int argc, char **argv)
 {
     int opt;
 
-    while ((opt = getopt(argc, argv, "hvf:r:")) != -1) {
+    while ((opt = getopt(argc, argv, "hvf:r:s:")) != -1) {
         switch (opt) {
         case 'h':
             help();
@@ -151,6 +159,9 @@ main(int argc, char **argv)
             break;
         case 'r':
             ram_cap = atoi(optarg) * UNIT_GIB;
+            break;
+        case 's':
+            sd_path = strdup(optarg);
             break;
         }
     }

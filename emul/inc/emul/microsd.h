@@ -12,6 +12,20 @@
 int microsd_init(void);
 
 /*
+ * Insert a microsd from a file
+ *
+ * @path: Path of file to insert
+ *
+ * Returns zero on success
+ */
+int microsd_insert(const char *path);
+
+/*
+ * Eject the current media from microsd
+ */
+void microsd_eject(void);
+
+/*
  * Destroy microsd context
  */
 void microsd_destroy(void);
