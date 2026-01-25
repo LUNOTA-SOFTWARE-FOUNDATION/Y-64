@@ -4,13 +4,13 @@
 ;;
 
 _start:
-    mov g0, 0x100000
-    mov g1, 0xFFFF
-    stw g0, g1
+    mov g0, 0x100000        ;; Local cache
+    mov g1, 0xFFFF          ;; Fill a single word
+    stw g0, g1              ;; Load it
 
-    mov g0, 0x110001
-    mov g1, prpd
-    stq g0, g1
+    mov g0, 0x110001        ;; Chipset registers [SPICTL]
+    mov g1, prpd            ;; Physical region page descriptor
+    stq g0, g1              ;; Post PRPD to SPI controller
     hlt
 
 prpd:
