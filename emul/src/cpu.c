@@ -651,9 +651,11 @@ cpu_run(struct cpu_domain *cpu)
             cpu->regbank[REG_PC] += 4;
             break;
         case OPCODE_LITR:
-        case OPCODE_B:
             cpu_decode_etype(cpu, &inst);
             cpu->regbank[REG_PC] += 2;
+            break;
+        case OPCODE_B:
+            cpu_decode_etype(cpu, &inst);
             break;
         default:
             cpu->esr = ESR_UD;
