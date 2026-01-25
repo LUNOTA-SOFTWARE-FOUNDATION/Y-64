@@ -11,6 +11,7 @@
 #include "emul/soc.h"
 #include "emul/cpu.h"
 #include "emul/busctl.h"
+#include "emul/microsd.h"
 
 /* Forward declaration */
 static struct bus_peer ram_peer;
@@ -150,6 +151,10 @@ soc_power_up(struct soc_desc *soc, size_t memcap)
     }
 
     memset(soc, 0, sizeof(*soc));
+    if (microsd_init() < 0) {
+        return -1;
+    }
+
     if (bus_peer_set(&ram_peer, MAIN_MEMORY_START) < 0) {
         return -1;
     }
@@ -181,6 +186,7 @@ soc_destroy(struct soc_desc *soc)
 
     cpu_destroy(&soc->cpu);
     balloon_destroy(&soc->ram);
+    microsd_destroy();
 }
 
 /* Main memory bus peer */
