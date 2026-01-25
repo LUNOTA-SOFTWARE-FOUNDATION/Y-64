@@ -122,6 +122,6 @@ spi_write(struct spi_prpd *prpd)
     }
 
     /* Flush the device */
-    slvp->flush(slvp);
+    slvp->flush(slvp, prpd->offset);
     return 0;
 }

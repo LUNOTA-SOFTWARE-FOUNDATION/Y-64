@@ -33,8 +33,9 @@ microsd_is_inserted(void)
 }
 
 static void
-microsd_write_block(struct spi_block *block)
+microsd_write_block(struct spi_block *block, off_t offset)
 {
+    printf("block @ off<%016zX>\n", offset);
     for (uint8_t i = 0; i < block->length; ++i) {
         if (i > 0 && i % 4 == 0) {
             printf("\n");
@@ -59,7 +60,7 @@ microsd_evict(struct spi_slave *slave)
 }
 
 static void
-microsd_flush(struct spi_slave *slave)
+microsd_flush(struct spi_slave *slave, off_t offset)
 {
     struct spi_block *block;
 
@@ -72,7 +73,7 @@ microsd_flush(struct spi_slave *slave)
 
     while (block != NULL) {
         if (microsd_is_inserted()) {
-            microsd_write_block(block);
+            microsd_write_block(block, offset);
         }
 
         TAILQ_REMOVE(&slave->blockq, block, link);

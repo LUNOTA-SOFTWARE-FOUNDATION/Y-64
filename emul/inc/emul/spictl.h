@@ -47,7 +47,7 @@ struct spi_block {
  */
 struct spi_slave {
     spi_id_t id;
-    void(*flush)(struct spi_slave *slave);
+    void(*flush)(struct spi_slave *slave, off_t off);
     void(*evict)(struct spi_slave *slave);
     TAILQ_HEAD(, spi_block) blockq;
 };
@@ -60,12 +60,14 @@ struct spi_slave {
  * @length:   Length of buffer
  * @chipsel:  Chip select / ID
  * @write:    If set, operations is a write
+ * @offset:   Offset of operation
  */
 struct PACKED spi_prpd {
     uintptr_t buffer;
     uint16_t length;
     uint8_t chipsel;
     uint8_t write : 1;
+    uint16_t offset;
 };
 
 /*
