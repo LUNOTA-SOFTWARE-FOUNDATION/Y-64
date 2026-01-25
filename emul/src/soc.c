@@ -12,10 +12,51 @@
 #include "emul/cpu.h"
 #include "emul/busctl.h"
 #include "emul/microsd.h"
+#include "emul/memctl.h"
+#include "emul/spictl.h"
 
 /* Forward declaration */
 static struct bus_peer ram_peer;
 static struct bus_peer chipset_peer;
+
+/*
+ * Handle SPI transactions
+ *
+ * @ctl: SPI ctl registers
+ */
+static int
+soc_spi_handle(struct spi_ctl *ctl)
+{
+    struct spi_prpd prpd;
+    ssize_t count;
+    int retval = 0;
+
+    if (ctl == NULL) {
+        return -1;
+    }
+
+    if (ctl->prpd == 0) {
+        return -1;
+    }
+
+    count = mem_read(
+        ctl->prpd,
+        &prpd,
+        sizeof(prpd)
+    );
+
+    if (count < 0) {
+        return -1;
+    }
+
+    ctl->ctlstat |= SPICTL_BUSY;
+    if (prpd.write) {
+        retval = spi_write(&prpd);
+    }
+
+    ctl->ctlstat &= ~SPICTL_BUSY;
+    return (retval < 0) ? -1 : 0;
+}
 
 static ssize_t
 ram_read(struct bus_peer *peer, uintptr_t addr, void *buf, size_t n)
@@ -108,7 +149,9 @@ chipset_write(struct bus_peer *peer, uintptr_t addr, const void *buf, size_t n)
 {
     struct soc_desc *soc;
     struct chipset_regs *cs_regs;
+    struct spi_ctl spi_ctl;
     uint8_t memctl;
+    int error = 0;
 
     if (peer == NULL || buf == NULL) {
         errno = -EINVAL;
@@ -127,6 +170,7 @@ chipset_write(struct bus_peer *peer, uintptr_t addr, const void *buf, size_t n)
 
     cs_regs = &soc->cs_regs;
     memctl = cs_regs->memctl;
+    spi_ctl = cs_regs->spi_ctl;
     memcpy(cs_regs, buf, n);
 
     /*
@@ -137,6 +181,16 @@ chipset_write(struct bus_peer *peer, uintptr_t addr, const void *buf, size_t n)
     if (!ISSET(cs_regs->memctl, CS_MEMCTL_CG)) {
         if (ISSET(memctl, CS_MEMCTL_CG))
             cs_regs->memctl |= CS_MEMCTL_CG;
+    }
+
+    /* Is there a new SPI transaction? */
+    if (spi_ctl.prpd == 0) {
+        spi_ctl = cs_regs->spi_ctl;
+
+        if (spi_ctl.prpd != 0)
+            error = soc_spi_handle(&cs_regs->spi_ctl);
+        if (error != 0)
+            return -1;
     }
 
     return n;

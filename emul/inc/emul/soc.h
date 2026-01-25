@@ -20,12 +20,26 @@
 #define CS_MEMCTL_CG (1 << 0)   /* Cache gate */
 
 /*
+ * SPI control registers used to talk with the
+ * SPI controller on the chipset
+ *
+ * @prpd: Physical region page descriptor
+ * @ctlstat: Control and status register
+ */
+struct PACKED spi_ctl {
+    uintptr_t prpd;
+    uint8_t ctlstat;
+};
+
+/*
  * Chipset register set
  *
  * @memctl: Memory control registerA
+ * @spi_ctl: SPI control registers
  */
 struct PACKED chipset_regs {
     uint8_t memctl;
+    struct spi_ctl spi_ctl;
 };
 
 /*
