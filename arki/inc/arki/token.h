@@ -51,6 +51,7 @@ typedef enum {
     TT_LDW,         /* 'ldw' */
     TT_LDL,         /* 'ldl' */
     TT_LDQ,         /* 'ldq' */
+    TT_B,           /* 'b' */
     TT_BYTE,        /* '.byte' */
 } tt_t;
 

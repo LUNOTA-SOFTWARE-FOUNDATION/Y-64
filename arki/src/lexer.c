@@ -349,6 +349,13 @@ lexer_check_kw(struct token *tok)
         }
 
         break;
+    case 'b':
+        if (strcmp(tok->s, "b") == 0) {
+            tok->type = TT_B;
+            return 0;
+        }
+
+        break;
     case 'g':
     case 'a':
         if (lexer_reg(tok) == 0) {
