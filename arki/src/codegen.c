@@ -28,6 +28,7 @@
 #define OPC_LDW   0x1A  /* Load word */
 #define OPC_LDL   0x1B  /* Load dword */
 #define OPC_LDQ   0x1C  /* Load qword */
+#define OPC_B     0x1D  /* Indirect branch */
 
 #define cg_emitb(state, byte) do {          \
         uint8_t b = (byte);                 \
@@ -387,6 +388,37 @@ cg_emit_bytes(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Emit a branch
+ *
+ * @state: Assembler state
+ * @root:  Root node
+ */
+static int
+cg_emit_branch(struct arki_state *state, struct ast_node *root)
+{
+    struct ast_node *rhs;
+
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    if (root->type != AST_BRANCH) {
+        trace_error(state, "expected 'b' as root node\n");
+        return -1;
+    }
+
+    rhs = root->right;
+    if (rhs->type != AST_REG) {
+        trace_error(state, "branch rhs is not register\n");
+        return -1;
+    }
+
+    cg_emitb(state, OPC_B);
+    cg_emitb(state, rhs->reg);
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -433,6 +465,12 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
         return 0;
     case AST_BYTE:
         if (cg_emit_bytes(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_BRANCH:
+        if (cg_emit_branch(state, root) < 0) {
             return -1;
         }
 

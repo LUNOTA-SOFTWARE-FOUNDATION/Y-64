@@ -31,6 +31,7 @@
  * @AST_LDW:    This node is a 'LDW' instruction
  * @AST_LDL:    This node is a 'LDL' instruction
  * @AST_LDQ:    This node is a 'LDQ' instruction
+ * @AST_BRANCH: This node is a 'B'   instruction
  * @AST_BYTE:   This node is a '.byte' directive
  * @AST_NUMBER: This node is a number
  * @AST_REG:    This node is a register
@@ -52,6 +53,7 @@ typedef enum {
     AST_LDW,
     AST_LDL,
     AST_LDQ,
+    AST_BRANCH,
     AST_BYTE,
     AST_NUMBER,
     AST_REG,
