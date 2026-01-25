@@ -22,8 +22,10 @@ _start:
     stq g0, g1          ;; Post read
 
     ;; TODO: WAIT FOR CONTROLLER TO READY
-    ;; TODO: Hardware bring-up / RAM check
-    hlt
+    ;; TODO: Hardware bring-up, RAM check and magic check
+
+    mov g0, 0x116000    ;; Bootloader entrypoint
+    b g0
 
 ;;
 ;; MicroSD physical region descriptor page, the bootloader
