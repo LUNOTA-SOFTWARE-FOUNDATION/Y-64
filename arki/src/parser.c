@@ -791,6 +791,74 @@ parse_load(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse a '.byte' directive
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_byte(struct arki_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root, *cur;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_BYTE) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_BYTE, &root) < 0) {
+        trace_error(state, "failed to allocate AST_BYTE\n");
+        return -1;
+    }
+
+    if (parse_expect(state, tok, TT_NUMBER) < 0) {
+        return -1;
+    }
+
+    cur = root;
+    while (tok->type == TT_NUMBER) {
+        if (ast_alloc_node(state, AST_NUMBER, &cur->right) < 0) {
+            trace_error(state, "failed to allocate AST_NUMBER\n");
+            return -1;
+        }
+
+        cur = cur->right;
+        cur->v = tok->v;
+
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+
+        if (tok->type == TT_NEWLINE) {
+            break;
+        }
+
+        if (tok->type != TT_COMMA) {
+            utok1(state, tokstr1(TT_COMMA), tokstr(tok));
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_NUMBER) < 0) {
+            return -1;
+        }
+    }
+
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the last token
  *
  * @state:  Assembler state
@@ -858,6 +926,12 @@ parse_begin(struct arki_state *state, struct token *tok)
     case TT_LDL:
     case TT_LDQ:
         if (parse_load(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_BYTE:
+        if (parse_byte(state, tok, &root) < 0) {
             return -1;
         }
 

@@ -187,13 +187,13 @@ cg_emit_or(struct arki_state *state, struct ast_node *root)
     rhs = root->right;
 
     if (lhs->type != AST_REG) {
-        trace_error(state, "lhs of mov is not a register\n");
+        trace_error(state, "lhs of or is not a register\n");
         return -1;
     }
 
     /* TODO: Support register ORs */
     if (rhs->type != AST_NUMBER) {
-        trace_error(state, "rhs of mov is not an imm\n");
+        trace_error(state, "rhs of or is not an imm\n");
         return -1;
     }
 
@@ -358,6 +358,35 @@ cg_emit_load(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Emit bytes to output file
+ *
+ * @state: Assembler state
+ * @root:  Root node
+ */
+static int
+cg_emit_bytes(struct arki_state *state, struct ast_node *root)
+{
+    struct ast_node *cur;
+
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    if (root->type != AST_BYTE) {
+        trace_error(state, "emit bytes root not AST_BYTE\n");
+        return -1;
+    }
+
+    cur = root->right;
+    while (cur != NULL) {
+        cg_emitb(state, cur->v & 0xFF);
+        cur = cur->right;
+    }
+
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -398,6 +427,12 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
         return 0;
     case AST_LITR:
         if (cg_emit_litr(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_BYTE:
+        if (cg_emit_bytes(state, root) < 0) {
             return -1;
         }
 
