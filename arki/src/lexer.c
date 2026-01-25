@@ -152,7 +152,7 @@ lexer_scan_ident(struct arki_state *state, int lc, struct token *res)
     buf[bufind++] = lc;
     for (;;) {
         c = lexer_consume(state, false);
-        if (!isalnum(c)) {
+        if (!isalnum(c) && c != '_') {
             buf[bufind] = '\0';
             if (c != ':') lexer_putback(state, c);
             break;
