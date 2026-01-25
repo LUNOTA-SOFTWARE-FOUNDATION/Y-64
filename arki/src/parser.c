@@ -95,7 +95,8 @@ static const char *toktab[] = {
     [TT_LDB]        = qtok("ldb"),
     [TT_LDW]        = qtok("ldw"),
     [TT_LDL]        = qtok("ldl"),
-    [TT_LDQ]        = qtok("ldq")
+    [TT_LDQ]        = qtok("ldq"),
+    [TT_BYTE]       = qtok(".byte")
 };
 
 /*

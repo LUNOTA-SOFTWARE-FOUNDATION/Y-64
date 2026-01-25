@@ -127,9 +127,17 @@ lexer_scan_ident(struct arki_state *state, int lc, struct token *res)
         return -1;
     }
 
-    if (!isalpha(lc) && lc != '_') {
-        errno = -EINVAL;
-        return -1;
+    switch (lc) {
+    case '_':
+    case '.':
+        break;
+    default:
+        if (!isalpha(lc)) {
+            errno = -EINVAL;
+            return -1;
+        }
+
+        break;
     }
 
     /* Set buffer capacity and index */
@@ -330,6 +338,13 @@ lexer_check_kw(struct token *tok)
 
         if (strcmp(tok->s, "ldq") == 0) {
             tok->type = TT_LDQ;
+            return 0;
+        }
+
+        break;
+    case '.':
+        if (strcmp(tok->s, ".byte") == 0) {
+            tok->type = TT_BYTE;
             return 0;
         }
 
