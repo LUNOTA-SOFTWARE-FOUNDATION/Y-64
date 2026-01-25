@@ -14,6 +14,7 @@
 #include "emul/balloon.h"
 #include "emul/microsd.h"
 #include "emul/spictl.h"
+#include "emul/memctl.h"
 #include "emul/trace.h"
 
 /* Forward declaration */
@@ -80,6 +81,49 @@ microsd_flush(struct spi_slave *slave, off_t offset)
         free(block);
         block = TAILQ_FIRST(&slave->blockq);
     }
+}
+
+static void
+microsd_recv(struct spi_slave *slave, struct spi_prpd *prpd)
+{
+    void *buf;
+    ssize_t count;
+
+    if (slave == NULL || prpd == NULL) {
+        return;
+    }
+
+    if (!microsd_is_inserted()) {
+        trace_error("cannot recv, no microsd inserted\n");
+        return;
+    }
+
+    /* Writes are not allowed */
+    if (prpd->write) {
+        trace_error("write prpd cannot be used for %s()\n", __func__);
+        return;
+    }
+
+    if ((buf = malloc(prpd->length)) == NULL) {
+        trace_error("microsd buf allocation failure\n");
+        return;
+    }
+
+    count = balloon_read(&sd_data, prpd->offset, buf, prpd->length);
+    if (count < 0) {
+        trace_error("microsd read failure\n");
+        free(buf);
+        return;
+    }
+
+    count = mem_write(prpd->buffer, buf, prpd->length);
+    if (count < 0) {
+        trace_error("microsd read/writeback failure\n");
+        free(buf);
+        return;
+    }
+
+    free(buf);
 }
 
 int
@@ -185,6 +229,7 @@ microsd_destroy(void)
 
 struct spi_slave microsd_slave = {
     .id = SPI_MICROSD,
+    .recv = microsd_recv,
     .flush = microsd_flush,
     .evict = microsd_evict
 };

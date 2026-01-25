@@ -37,22 +37,6 @@ struct spi_block {
 };
 
 /*
- * Represents an SPI endpoint device that may have
- * transactions fowarded
- *
- * @id:     Device ID
- * @flush:  Callback to flush block queue
- * @evict:  Evict all entries
- * @blockq: List of blocks to be processed
- */
-struct spi_slave {
-    spi_id_t id;
-    void(*flush)(struct spi_slave *slave, off_t off);
-    void(*evict)(struct spi_slave *slave);
-    TAILQ_HEAD(, spi_block) blockq;
-};
-
-/*
  * Physical region page descriptor used to
  * describe memory areas to the SPI controller
  *
@@ -68,6 +52,24 @@ struct PACKED spi_prpd {
     uint8_t chipsel;
     uint8_t write : 1;
     uint16_t offset;
+};
+
+/*
+ * Represents an SPI endpoint device that may have
+ * transactions fowarded
+ *
+ * @id:     Device ID
+ * @recv:   Callback to get data from device
+ * @flush:  Callback to flush block queue
+ * @evict:  Evict all entries
+ * @blockq: List of blocks to be processed
+ */
+struct spi_slave {
+    spi_id_t id;
+    void(*recv)(struct spi_slave *slave, struct spi_prpd *prpd);
+    void(*flush)(struct spi_slave *slave, off_t off);
+    void(*evict)(struct spi_slave *slave);
+    TAILQ_HEAD(, spi_block) blockq;
 };
 
 /*
@@ -99,5 +101,14 @@ int spi_register_device(spi_id_t id, struct spi_slave *device);
  * Returns zero on success
  */
 int spi_write(struct spi_prpd *prpd);
+
+/*
+ * Read data from an SPI device
+ *
+ * @prpd: Physical region page descriptor
+ *
+ * Returns zero on success
+ */
+int spi_read(struct spi_prpd *prpd);
 
 #endif  /* !EMUL_SPICTL_H */

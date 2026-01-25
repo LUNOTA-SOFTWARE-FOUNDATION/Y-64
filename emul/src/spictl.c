@@ -16,6 +16,7 @@ static struct spi_slave spi_bus[] = {
     [SPI_MICROSD] =
     {
         .id    = SPI_MICROSD,
+        .recv  = NULL,
         .flush = NULL,
         .evict = NULL
     }
@@ -31,12 +32,18 @@ spi_register_device(spi_id_t id, struct spi_slave *device)
         return -1;
     }
 
+    if (device->recv == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
     if (device->evict == NULL || device->flush == NULL) {
         errno = -EINVAL;
         return -1;
     }
 
     slvp = &spi_bus[id];
+    slvp->recv  = device->recv;
     slvp->flush = device->flush;
     slvp->evict = device->evict;
     TAILQ_INIT(&slvp->blockq);
@@ -123,5 +130,22 @@ spi_write(struct spi_prpd *prpd)
 
     /* Flush the device */
     slvp->flush(slvp, prpd->offset);
+    return 0;
+}
+
+int
+spi_read(struct spi_prpd *prpd)
+{
+    struct spi_slave *slvp;
+    uint8_t id;
+
+    id = prpd->chipsel;
+    if (id >= NELEM(spi_bus) || prpd == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    slvp = &spi_bus[id];
+    slvp->recv(slvp, prpd);
     return 0;
 }

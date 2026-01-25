@@ -52,6 +52,8 @@ soc_spi_handle(struct spi_ctl *ctl)
     ctl->ctlstat |= SPICTL_BUSY;
     if (prpd.write) {
         retval = spi_write(&prpd);
+    } else {
+        retval = spi_read(&prpd);
     }
 
     ctl->ctlstat &= ~SPICTL_BUSY;
