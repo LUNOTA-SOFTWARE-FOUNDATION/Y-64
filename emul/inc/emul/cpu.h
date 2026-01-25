@@ -37,6 +37,7 @@
 #define OPCODE_LDW   0x1A        /* Load word [B] */
 #define OPCODE_LDL   0x1B        /* Load dword [B] */
 #define OPCODE_LDQ   0x1C        /* Load qword [B] */
+#define OPCODE_B     0x1D        /* Indirect branch [E] */
 
 /* Error syndrome types */
 #define ESR_MAV  0x01           /* Memory access violation */

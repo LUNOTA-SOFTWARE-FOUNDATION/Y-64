@@ -252,6 +252,9 @@ cpu_decode_etype(struct cpu_domain *cpu, inst_t *inst)
     case OPCODE_LITR:
         cpu->itr = cpu->regbank[rs];
         break;
+    case OPCODE_B:
+        cpu->regbank[REG_PC] = cpu->regbank[rs];
+        break;
     }
 }
 
@@ -648,6 +651,7 @@ cpu_run(struct cpu_domain *cpu)
             cpu->regbank[REG_PC] += 4;
             break;
         case OPCODE_LITR:
+        case OPCODE_B:
             cpu_decode_etype(cpu, &inst);
             cpu->regbank[REG_PC] += 2;
             break;
