@@ -55,6 +55,7 @@ soc_spi_handle(struct spi_ctl *ctl)
     }
 
     ctl->ctlstat &= ~SPICTL_BUSY;
+    ctl->prpd = 0;
     return (retval < 0) ? -1 : 0;
 }
 
