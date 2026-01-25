@@ -154,7 +154,7 @@ lexer_scan_ident(struct arki_state *state, int lc, struct token *res)
         c = lexer_consume(state, false);
         if (!isalnum(c)) {
             buf[bufind] = '\0';
-            lexer_putback(state, c);
+            if (c != ':') lexer_putback(state, c);
             break;
         }
 
@@ -171,7 +171,7 @@ lexer_scan_ident(struct arki_state *state, int lc, struct token *res)
         }
     }
 
-    res->type = TT_IDENT;
+    res->type = c != ':' ? TT_IDENT : TT_LABEL;
     res->s = ptrbox_strdup(&state->ptrbox, buf);
     free(buf);
     return 0;
@@ -451,10 +451,6 @@ lexer_scan(struct arki_state *state, struct token *res)
     switch (c) {
     case ',':
         res->type = TT_COMMA;
-        res->c = c;
-        return 0;
-    case ':':
-        res->type = TT_COLON;
         res->c = c;
         return 0;
     case '\n':

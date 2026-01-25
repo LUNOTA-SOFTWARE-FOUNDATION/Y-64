@@ -62,8 +62,8 @@ static const char *toktab[] = {
     [TT_IDENT]      = symtok("ident"),
     [TT_NUMBER]     = symtok("number"),
     [TT_COMMENT]    = symtok("comment"),
+    [TT_LABEL]      = symtok("label"),
     [TT_COMMA]      = qtok(","),
-    [TT_COLON]      = qtok(":"),
     [TT_NEWLINE]    = symtok("newline"),
     [TT_MOV]        = qtok("mov"),
     [TT_G0]         = qtok("g0"),
@@ -548,13 +548,13 @@ parse_litr(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
- * Parse an identifier
+ * Parse a label
  *
  * @state: Assembler state
  * @tok:   Last token
  */
 static int
-parse_ident(struct arki_state *state, struct token *tok)
+parse_label(struct arki_state *state, struct token *tok)
 {
     struct symbol *sym;
     int error;
@@ -563,7 +563,7 @@ parse_ident(struct arki_state *state, struct token *tok)
         return -1;
     }
 
-    if (tok->type != TT_IDENT) {
+    if (tok->type != TT_LABEL) {
         return -1;
     }
 
@@ -581,10 +581,6 @@ parse_ident(struct arki_state *state, struct token *tok)
         }
 
         sym->vpc = arki_get_vpc(state);
-    }
-
-    if (parse_expect(state, tok, TT_COLON) < 0) {
-        return -1;
     }
 
     return 0;
@@ -942,8 +938,8 @@ parse_begin(struct arki_state *state, struct token *tok)
     case TT_COMMENT:
         /* Ignored */
         break;
-    case TT_IDENT:
-        if (parse_ident(state, tok) < 0) {
+    case TT_LABEL:
+        if (parse_label(state, tok) < 0) {
             return -1;
         }
 
