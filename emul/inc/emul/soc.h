@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include "emul/cpu.h"
 #include "emul/balloon.h"
+#include "emul/defs.h"
 
 #define MAIN_MEMORY_START   0x116000
 #define CHIPSET_REGS_START  0x110000
@@ -23,7 +24,7 @@
  *
  * @memctl: Memory control registerA
  */
-struct chipset_regs {
+struct PACKED chipset_regs {
     uint8_t memctl;
 };
 
