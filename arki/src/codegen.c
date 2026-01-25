@@ -80,7 +80,7 @@ cg_emit_mov(struct arki_state *state, struct ast_node *root)
             return -1;
         }
 
-        imm = (symbol != NULL) ? symbol->vpc : 0xFFFFFFFFFFFF;
+        imm = (symbol != NULL) ? symbol->vpc : 0xFF;
         break;
     default:
         trace_error(state, "unexpectd rhs type %d for mov\n", rhs->type);
