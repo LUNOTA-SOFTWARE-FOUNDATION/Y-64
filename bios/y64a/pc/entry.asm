@@ -16,9 +16,24 @@ _start:
     or g1, 1            ;; MEMCTL.CG (cache gate enable)
     stb g0, g1          ;; Write it back
 
-    ;;
-    ;; TODO: Verify external RAM is present and functional,
-    ;;       bring up hardware and load bootloader from the
-    ;;       SD card.
-    ;;
+    ;; Load bootloader
+    mov g0, 0x110001    ;; Chipset SPICTL base
+    mov g1, rd_prpd     ;; Read-op PRPD
+    stq g0, g1          ;; Post read
+
+    ;; TODO: WAIT FOR CONTROLLER TO READY
+    ;; TODO: Hardware bring-up / RAM check
     hlt
+
+;;
+;; MicroSD physical region descriptor page, the bootloader
+;; shall be at offset zero and loaded to address 0x116000
+;;
+;; TODO: We are currently only loading 512 bytes, this must
+;;       be variable length.
+;;
+rd_prpd:         .byte 0x00, 0x60, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00
+rd_prpd_len:     .byte 0x00, 0x02
+rd_prpd_chipsel: .byte 0x00
+rd_prpd_write:   .byte 0x00
+rd_prpd_off:     .byte 0x00, 0x00
