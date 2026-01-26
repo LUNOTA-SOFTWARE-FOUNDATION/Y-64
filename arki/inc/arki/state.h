@@ -60,10 +60,11 @@ arki_get_vpc(struct arki_state *state)
  *
  * @state: Assembler state to initialize
  * @path:  Path of input file
+ * @outpath: Output file path name
  *
  * Returns zero on success
  */
-int arki_state_init(struct arki_state *state, const char *path);
+int arki_state_init(struct arki_state *state, const char *path, const char *outpath);
 
 /*
  * Close the assembler state machine

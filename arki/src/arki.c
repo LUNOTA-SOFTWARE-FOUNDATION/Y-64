@@ -4,11 +4,15 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include "arki/state.h"
 #include "arki/parser.h"
 
 #define ARKI_VERSION "0.0.2"
+
+/* Output file name */
+static const char *out_path = DEFAULT_OUT;
 
 static void
 help(void)
@@ -19,6 +23,7 @@ help(void)
         "-----------------------------\n"
         "[-h]   Display this help menu\n"
         "[-v]   Display the version\n"
+        "[-o]   Output file name\n"
     );
 }
 
@@ -39,7 +44,7 @@ assemble(const char *path)
 {
     struct arki_state state;
 
-    if (arki_state_init(&state, path) < 0) {
+    if (arki_state_init(&state, path, out_path) < 0) {
         perror("arki_state_init");
         return -1;
     }
@@ -64,7 +69,7 @@ main(int argc, char **argv)
         help();
     }
 
-    while ((opt = getopt(argc, argv, "hv")) != -1) {
+    while ((opt = getopt(argc, argv, "hvo:")) != -1) {
         switch (opt) {
         case 'h':
             help();
@@ -72,6 +77,9 @@ main(int argc, char **argv)
         case 'v':
             version();
             return -1;
+        case 'o':
+            out_path = strdup(optarg);
+            break;
         }
     }
 
