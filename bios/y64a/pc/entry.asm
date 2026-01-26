@@ -16,26 +16,40 @@ _start:
     or g1, 1            ;; MEMCTL.CG (cache gate enable)
     stb g0, g1          ;; Write it back
 
+    ;; Construct a PRDP
+    mov g0, 0x100000    ;; PD lcache [prpd buffer]
+    mov g1, 0x116000    ;; Bootloader header
+    stq g0, g1          ;; Write it
+
+    mov g0, 0x100008    ;; PD lcache [prpd length]
+    mov g1, 0x8         ;; Eight bytes for header
+    stw g0, g1          ;; Write it
+
+    mov g0, 0x10000A    ;; PD lcache [prpd write]
+    mov g1, 0x0         ;; Read operation
+    stw g0, g1          ;; Write it
+
+    mov g0, 0x10000C    ;; PD lcache [prpd off]
+    stw g0, g1          ;; Write it
+
     ;; Load bootloader
     mov g0, 0x110001    ;; Chipset SPICTL base
-    mov g1, rd_prpd     ;; Read-op PRPD
+    mov g1, 0x100000    ;; Read-op PRPD
     stq g0, g1          ;; Post read
 
     ;; TODO: WAIT FOR CONTROLLER TO READY
     ;; TODO: Hardware bring-up, RAM check and magic check
 
-    mov g0, 0x116000    ;; Bootloader entrypoint
-    b g0
+    ;; Update total length
+    mov g0, 0x116002
+    ldw g1, g0
+    mov g0, 0x100008
+    stw g0, g1
 
-;;
-;; MicroSD physical region descriptor page, the bootloader
-;; shall be at offset zero and loaded to address 0x116000
-;;
-;; TODO: We are currently only loading 512 bytes, this must
-;;       be variable length.
-;;
-rd_prpd:         .byte 0x00, 0x60, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00
-rd_prpd_len:     .byte 0x00, 0x02
-rd_prpd_chipsel: .byte 0x00
-rd_prpd_write:   .byte 0x00
-rd_prpd_off:     .byte 0x00, 0x00
+    ;; Load rest of bootloader
+    mov g0, 0x110001    ;; Chipset SPICTL base
+    mov g1, 0x100000    ;; Read-op PRPD
+    stq g0, g1          ;; Post read
+
+    mov g0, 0x116008    ;; Bootloader entrypoint
+    b g0
