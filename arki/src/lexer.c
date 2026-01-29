@@ -348,6 +348,11 @@ lexer_check_kw(struct token *tok)
             return 0;
         }
 
+        if (strcmp(tok->s, ".skip") == 0) {
+            tok->type = TT_SKIP;
+            return 0;
+        }
+
         break;
     case 'b':
         if (strcmp(tok->s, "b") == 0) {

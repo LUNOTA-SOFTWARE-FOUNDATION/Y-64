@@ -97,7 +97,8 @@ static const char *toktab[] = {
     [TT_LDL]        = qtok("ldl"),
     [TT_LDQ]        = qtok("ldq"),
     [TT_B]          = qtok("b"),
-    [TT_BYTE]       = qtok(".byte")
+    [TT_BYTE]       = qtok(".byte"),
+    [TT_SKIP]       = qtok(".skip")
 };
 
 /*
@@ -984,6 +985,12 @@ parse_begin(struct arki_state *state, struct token *tok)
         break;
     case TT_BYTE:
         if (parse_byte(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_SKIP:
+        if (parse_skip(state, tok, &root) < 0) {
             return -1;
         }
 
