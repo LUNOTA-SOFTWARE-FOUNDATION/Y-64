@@ -912,6 +912,48 @@ parse_branch(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse a '.skip' directive
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ * @res:    Result AST node is written here
+ *
+ * Returns zero on success
+ */
+static int
+parse_skip(struct arki_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root, *rhs;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_SKIP) {
+        return -1;
+    }
+
+    if (parse_expect(state, tok, TT_NUMBER) < 0) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_SKIP, &root) < 0) {
+        trace_error(state, "failed to allocate AST_SKIP\n");
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_NUMBER, &root->right) < 0) {
+        trace_error(state, "failed to allocate AST_NUMBER\n");
+        return -1;
+    }
+
+    rhs = root->right;
+    rhs->v = tok->v;
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the last token
  *
  * @state:  Assembler state

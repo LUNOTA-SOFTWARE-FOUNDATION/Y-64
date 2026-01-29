@@ -419,6 +419,38 @@ cg_emit_branch(struct arki_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Emit a skip directive
+ *
+ * @state: Assembler state
+ * @root:  Root node
+ */
+static int
+cg_emit_skip(struct arki_state *state, struct ast_node *root)
+{
+    struct ast_node *rhs;
+
+    if (state == NULL || root == NULL) {
+        return -1;
+    }
+
+    if (root->type != AST_SKIP) {
+        return -1;
+    }
+
+    if ((rhs = root->right) == NULL) {
+        trace_error(state, "skip rhs has no number\n");
+        return -1;
+    }
+
+    /* Skip a number of bytes */
+    for (uintptr_t i = 0; i < rhs->v; ++i) {
+        cg_emitb(state, 0x00);
+    }
+
+    return 0;
+}
+
 int
 cg_resolve_node(struct arki_state *state, struct ast_node *root)
 {
@@ -465,6 +497,12 @@ cg_resolve_node(struct arki_state *state, struct ast_node *root)
         return 0;
     case AST_BYTE:
         if (cg_emit_bytes(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_SKIP:
+        if (cg_emit_skip(state, root) < 0) {
             return -1;
         }
 

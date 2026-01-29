@@ -53,6 +53,7 @@ typedef enum {
     TT_LDQ,         /* 'ldq' */
     TT_B,           /* 'b' */
     TT_BYTE,        /* '.byte' */
+    TT_SKIP,        /* '.skip' */
 } tt_t;
 
 /*

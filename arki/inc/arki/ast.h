@@ -33,6 +33,7 @@
  * @AST_LDQ:    This node is a 'LDQ' instruction
  * @AST_BRANCH: This node is a 'B'   instruction
  * @AST_BYTE:   This node is a '.byte' directive
+ * @AST_SKIP:   This node is a '.skip' directive
  * @AST_NUMBER: This node is a number
  * @AST_REG:    This node is a register
  * @AST_LABEL:  This node is a register
@@ -55,6 +56,7 @@ typedef enum {
     AST_LDQ,
     AST_BRANCH,
     AST_BYTE,
+    AST_SKIP,
     AST_NUMBER,
     AST_REG,
     AST_LABEL,
