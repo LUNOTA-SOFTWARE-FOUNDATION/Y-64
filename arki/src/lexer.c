@@ -465,6 +465,10 @@ lexer_scan(struct arki_state *state, struct token *res)
         res->type = TT_COMMA;
         res->c = c;
         return 0;
+    case '@':
+        res->type = TT_AT;
+        res->c = c;
+        return 0;
     case '\n':
         ++state->line_num;
         res->type = TT_NEWLINE;

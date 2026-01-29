@@ -19,6 +19,7 @@ typedef enum {
     TT_COMMENT,     /* <COMMENT> */
     TT_LABEL,       /* <LABEL> */
     TT_COMMA,       /* ',' */
+    TT_AT,          /* '@' */
     TT_NEWLINE,     /* '\n' */
     TT_MOV,         /* 'mov' */
     TT_G0,          /* 'g0' */
