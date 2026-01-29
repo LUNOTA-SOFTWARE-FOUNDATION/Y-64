@@ -353,6 +353,11 @@ lexer_check_kw(struct token *tok)
             return 0;
         }
 
+        if (strcmp(tok->s, ".origin") == 0) {
+            tok->type = TT_ORIGIN;
+            return 0;
+        }
+
         break;
     case 'b':
         if (strcmp(tok->s, "b") == 0) {

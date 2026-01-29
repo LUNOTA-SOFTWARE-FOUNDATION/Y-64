@@ -55,6 +55,7 @@ typedef enum {
     TT_B,           /* 'b' */
     TT_BYTE,        /* '.byte' */
     TT_SKIP,        /* '.skip' */
+    TT_ORIGIN,      /* '.origin' */
 } tt_t;
 
 /*
