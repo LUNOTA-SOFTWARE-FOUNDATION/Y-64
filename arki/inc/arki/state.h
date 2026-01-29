@@ -27,6 +27,7 @@
  * @line_num:   Current line number
  * @pass_count: Number of passes made
  * @origin:     Program origin address
+ * @out_size:   Output binary size
  * @vpc:        Virtual program counter
  * @putback:    Putback buffer for lexer
  */
@@ -39,6 +40,7 @@ struct arki_state {
     size_t line_num;
     size_t pass_count;
     uintptr_t origin;
+    size_t out_size;
     uintptr_t vpc;
     char putback;
 };

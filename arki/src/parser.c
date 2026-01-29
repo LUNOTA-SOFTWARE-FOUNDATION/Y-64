@@ -820,19 +820,29 @@ parse_byte(struct arki_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
-    if (parse_expect(state, tok, TT_NUMBER) < 0) {
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    if (tok->type != TT_NUMBER && tok->type != TT_AT) {
+        utok1(state, "numbers or '@'", tokstr(tok));
         return -1;
     }
 
     cur = root;
-    while (tok->type == TT_NUMBER) {
+    for (;;) {
         if (ast_alloc_node(state, AST_NUMBER, &cur->right) < 0) {
             trace_error(state, "failed to allocate AST_NUMBER\n");
             return -1;
         }
 
         cur = cur->right;
-        cur->v = tok->v;
+        if (tok->type == TT_AT) {
+            cur->v = state->out_size;
+        } else {
+            cur->v = tok->v;
+        }
 
         if (parse_scan(state, tok) < 0) {
             ueof(state);
@@ -848,7 +858,13 @@ parse_byte(struct arki_state *state, struct token *tok, struct ast_node **res)
             return -1;
         }
 
-        if (parse_expect(state, tok, TT_NUMBER) < 0) {
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+
+        if (tok->type != TT_NUMBER && tok->type != TT_AT) {
+            utok1(state, "numbers or '@'", tokstr(tok));
             return -1;
         }
     }
@@ -1080,6 +1096,10 @@ arki_parse(struct arki_state *state)
         if (parse_begin(state, &state->last_tok) < 0) {
             return -1;
         }
+    }
+
+    if (state->pass_count == 0) {
+        state->out_size = state->vpc;
     }
 
     ++state->pass_count;
