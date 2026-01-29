@@ -972,6 +972,33 @@ parse_skip(struct arki_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse an '.origin' directive
+ *
+ * @state:  Assembler state
+ * @tok:    Last token
+ *
+ * Returns zero on success
+ */
+static int
+parse_origin(struct arki_state *state, struct token *tok)
+{
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_ORIGIN) {
+        return -1;
+    }
+
+    if (parse_expect(state, tok, TT_NUMBER) < 0) {
+        return -1;
+    }
+
+    state->origin = tok->v;
+    return 0;
+}
+
+/*
  * Parse the last token
  *
  * @state:  Assembler state
@@ -1069,6 +1096,12 @@ parse_begin(struct arki_state *state, struct token *tok)
         break;
     case TT_LABEL:
         if (parse_label(state, tok) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_ORIGIN:
+        if (parse_origin(state, tok) < 0) {
             return -1;
         }
 
